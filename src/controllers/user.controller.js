@@ -36,9 +36,7 @@ async function createUser (req, res) {
   if(req.body != null){
 	  console.log(req.body);
 	  user = new User();
-	  user.userName = req.body.userName;
-	  user.firstName = req.body.firstName;
-	  user.lastName = req.body.lastName;
+	  user = req.body
 	  user.password = await helpers.encriptarPassword(req.body.password);
 	  console.log(user);
 	  user.save((err, userStored) => {

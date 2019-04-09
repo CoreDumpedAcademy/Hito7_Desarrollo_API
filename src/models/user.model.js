@@ -14,10 +14,19 @@ const UserSchema = new Schema({
 	firstName: { type: String, required: true, maxlength: 50 },
 	lastName: { type: String, required: true, maxlength: 50 },
 	role: { type: String, enum: enumerator.role, default: enumerator.role[1] },
+	age: { type: Number},
+	gender: {type: String, enum: enumerator.gender},
 	password: {
 		type: String,
-	    select: false,
-			required: true
+	  select: false,
+		required: true
+	},
+	signUp: {type: Date, default: Date.now()},
+	statistics : {
+		lastLogin: { type: Date, default: Date.now()},
+		favTag: { type: String[3], enum: enumerator.tags },
+		// NO SÉ SI LA DECLARACIÓN DE STRING[3] FUNCIONARÁ.
+		// TODO->AÑADIR MÁS ESTADISTICAS
 	}
 });
 
