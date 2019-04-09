@@ -1,7 +1,5 @@
 
 const User = require("../models/user.model");
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 /*

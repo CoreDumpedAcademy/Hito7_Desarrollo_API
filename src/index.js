@@ -1,22 +1,13 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const users = require('./routes/user.routes');
-const app = express();
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+const app = require('./app')
+const config = require('./config')
 
-const port  = 3000;
-const dev_db_url = 'mongodb://localhost/ionic-news-api';
-const mongoDB = process.env.MONGODB_URI || dev_db_url;
-mongoose.connect(mongoDB, {useNewUrlParser: true});
-mongoose.Promise = global.Promise;
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MONGODB CONECCTION ERROR! '));
-app.use(bodyParser.urlencoded({extended:false}));
-app.use('/users', users);
-app
-app.get('/', function(req, res){
-	res.send('Hello World!');
-});
-app.listen(port, function(){
-	console.log('Listening on Port : ' + port );
-});
+mongoose.connect(config.db, {useNewUrlParser: true }, (err, res) => {
+    if(err){ return console.log("Error al conectar a la base de datos "+ err) }
+
+    console.log('Se ha conectado a la base de datos')
+
+    app.listen(config.port, () => {
+        console.log(`Servidor iniciado en http://localhost:${config.port}`)
+    })
+})
