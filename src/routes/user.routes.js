@@ -9,7 +9,7 @@ api.post('/user', userController.createUser);
 //api.post('/logUser', userController.logUser);
 api.get('/user/:userId', userController.getUser);
 api.get('/users', userController.getUserList);
-api.put('/user', userController.updateUser);
+api.put('/user/:userId', userController.updateUser);
 api.delete('/user/:userId', userController.deleteUser);
 
 module.exports = api;
