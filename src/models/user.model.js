@@ -16,6 +16,7 @@ const UserSchema = new Schema({
 	role: { type: String, enum: enumerator.role, default: enumerator.role[1] },
 	age: { type: Number},
 	gender: {type: String, enum: enumerator.gender},
+	isActive: {type: Boolean, default: true},
 	password: {
 		type: String,
 	  select: false,
@@ -24,8 +25,6 @@ const UserSchema = new Schema({
 	signUp: {type: Date, default: Date.now()},
 	statistics : {
 		lastLogin: { type: Date, default: Date.now()},
-		favTag: { type: String[3], enum: enumerator.tags },
-		// NO SÉ SI LA DECLARACIÓN DE STRING[3] FUNCIONARÁ.
 		// TODO->AÑADIR MÁS ESTADISTICAS
 	}
 });

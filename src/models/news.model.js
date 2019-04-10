@@ -8,7 +8,6 @@ const NewsSchema = new Schema({
     url: {type: String, required: true},
     urlToImg: {type: String},
     publishedAt: {type: Date},
-    tags: {type: String[3], enum: enumerator.tags},
     content: {type: String}
 })
 

@@ -51,8 +51,59 @@ async function createUser (req, res) {
 	}
 }
 
-function getUserList(req, res) {
+
+// LAS DOS FUNCIONES SIGUIENTES SIRVEN PARA ACTIVAR O DESACTIVAR EL USUARIO (BORRADO LÓGICO)
+// PARA USARLAS, EL USUARIO TIENE QUE SER PASADO COMO BODY AL HACER LA PETICIÓN.
+function deactivate(req, res) {
+  var input = req.body
+  input.isActive = false
+  User.findOneAndUpdate({userName: input.user}, input, (err, updated) => {
+    if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if(!updated) return res.status(404).send({message: 'Error 404' })
+
+    res.status(200).send({updated})
+  })
+}
+
+function activate(req, res) {
+  var input = req.body
+  input.isActive = true
+  User.findOneAndUpdate({userName: input.user}, input, (err, updated) => {
+    if(err) return res.status(500).send({message: `Error al activar el usuario ${err}`})
+    if(!updated) return res.status(404).send({message: 'Error 404' })
+
+    res.status(200).send({updated})
+  })
+}
+
+
+// ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS ACTIVOS
+function getActiveUsers(req, res) {
+  User.find({isActive: true}, (err, users) => {
+    if (err)
+      return res
+        .status(500)
+        .send({ message: `Error al realizar la petición: ${err}` });
+    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+
+    res.status(200).send({ users });
+  });
+}
+// ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS
+function getAllUsers(req, res) {
   User.find({}, (err, users) => {
+    if (err)
+      return res
+        .status(500)
+        .send({ message: `Error al realizar la petición: ${err}` });
+    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+
+    res.status(200).send({ users });
+  });
+}
+// ESTA FUNCIÓN DEVUELVE LOS USUARIOS INACTIVOS
+function getInactiveUsers(req, res) {
+  User.find({isActive: false}, (err, users) => {
     if (err)
       return res
         .status(500)
@@ -113,6 +164,10 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
-  getUserList,
+  getActiveUsers,
+  getAllUsers,
+  getInactiveUsers,
+  activate,
+  deactivate
  // logUser
 };

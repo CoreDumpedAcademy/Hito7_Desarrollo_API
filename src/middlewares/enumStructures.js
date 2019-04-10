@@ -4,22 +4,16 @@ const role = [
 	'baseUser'
 ]
 const modelsName = {
-		user:'User',
+	user:'User',
 }
 const gender = [
-	'Man',
-	'Woman',
+	'Male',
+	'Female',
 	'Other'
-]
-// ETIQUETAS DE NOTICIAS (he puesto dos de ejemplo, pero lo suyo sería poner más si os gusta la idea)
-const tags = [
-	'Sports',
-	'Economy'
 ]
 
 module.exports = {
 	role,
 	modelsName,
 	gender,
-	tags
 };
