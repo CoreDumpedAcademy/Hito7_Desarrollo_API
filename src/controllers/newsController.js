@@ -4,8 +4,8 @@ const newsapi = new NewsAPI(newsapi_config.token);
 const enume = require("../middlewares/enumStructures");
 
 /**
- * @param {*} req 
- * @param {*} res 
+ * 
+ * @param {string} idioma Idioma de la fuente
  * Esta funcion devuelve un string con todas las fuentes que corresponden con el language indicado
  */
 async function getSources(idioma) {
@@ -36,35 +36,30 @@ async function getSources(idioma) {
  * idioma por defecto: en (inglés)
  * Sources por defecto: *
  * query (búsqueda) por defecto: *
- * TO-DO: Añadir soporte para buscar por fechas
+ * TO-DO: Añadir soporte para buscar por fechas y ordenar 
  **/
 async function getNews(req, res) {
 
+    //Querys que se pasan por parametro
     var idioma = req.query.lang
-    var pais = req.query.country
-    var categoria = req.query.categoria
     var busqueda = req.query.q
     var fuentes = req.query.sources
 
     console.log(req.query)
 
-    if (!enume.countriesArray.includes(pais)) {
-        pais = 'us'
-    }
-
+    //si no se indica idioma, se utilizará inglés
     if (!enume.languagesArray.includes(idioma)) {
         idioma = 'en'
     }
 
-    if (!enume.categoriesArray.includes(categoria)) {
-        categoria = enume.categoriesArray[enume.categoriesArray.length - 1]
-    }
-
+    //si no se indica una fuente se utilizaran todas del idioma seleccionado
     if(fuentes===undefined){
         fuentes = await getSources(idioma)
     }
 
     console.log(fuentes)
+
+    //Si la busqueda resulta undefined (no realiza busqueda)
     if (busqueda === undefined) {
         await newsapi.v2.everything({
             sources: fuentes,
@@ -78,6 +73,7 @@ async function getNews(req, res) {
         }).catch(err => {
             res.status(500).send({Message:`Error: ${err}`})
         })
+    //Si se incluye una query (busqueda)
     } else {
         await newsapi.v2.everything({
             sources: fuentes,
