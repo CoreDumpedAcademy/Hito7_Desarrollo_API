@@ -32,12 +32,10 @@ function logUser(req, res) {
 }
 */
 async function createUser (req, res) {
-  let user = null;
   if(req.body != null){
-	  console.log(req.body);
-	  user = new User();
-	  user = req.body
-	  user.password = await helpers.encriptarPassword(req.body.password);
+    console.log(req.body);
+    var user = new User(req.body)
+    user.password = await helpers.encriptarPassword(req.body.password)
 	  console.log(user);
 	  user.save((err, userStored) => {
 	  console.log(userStored);
