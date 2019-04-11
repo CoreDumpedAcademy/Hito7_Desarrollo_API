@@ -17,7 +17,7 @@ api.get('/users/Inactive', userController.getInactiveUsers) // USUARIOS INACTIVO
 api.put('/user', userController.updateUser);
 api.delete('/user/:userId', userController.deleteUser);
 
-api.put('/user/activate', userController.activate) // ACTIVAR USUARIO (SI ESTÁ INACTIVO)
-api.put('/user/deactivate', userController.deactivate) // DESACTIVAR USUARIO (SI ESTÁ ACTIVO)
+api.put('/user/activate/:username', userController.activate) // ACTIVAR USUARIO (SI ESTÁ INACTIVO)
+api.put('/user/deactivate/:username', userController.deactivate) // DESACTIVAR USUARIO (SI ESTÁ ACTIVO)
 
 module.exports = api;

@@ -51,26 +51,28 @@ async function createUser (req, res) {
 
 
 // LAS DOS FUNCIONES SIGUIENTES SIRVEN PARA ACTIVAR O DESACTIVAR EL USUARIO (BORRADO LÓGICO)
-// PARA USARLAS, EL USUARIO TIENE QUE SER PASADO COMO BODY AL HACER LA PETICIÓN.
+// PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL NOMBRE DE USUARIO AL QUE ACTIVAR - DESACTIVAR
 function deactivate(req, res) {
-  var input = req.body
-  input.isActive = false
-  User.findOneAndUpdate({userName: input.user}, input, (err, updated) => {
+  var username = req.params.username
+  User.findOne({userName: username}, (err, updated) => {
     if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
     if(!updated) return res.status(404).send({message: 'Error 404' })
-
-    res.status(200).send({updated})
+    updated.isActive = false
+    User.findOneAndUpdate({userName: username}, updated, () =>{
+      return res.status(200).send({message: 'User deactivated correctly'})
+    })
   })
 }
 
 function activate(req, res) {
-  var input = req.body
-  input.isActive = true
-  User.findOneAndUpdate({userName: input.user}, input, (err, updated) => {
-    if(err) return res.status(500).send({message: `Error al activar el usuario ${err}`})
+  var username = req.params.username
+  User.findOne({userName: username}, (err, updated) => {
+    if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
     if(!updated) return res.status(404).send({message: 'Error 404' })
-
-    res.status(200).send({updated})
+    updated.isActive = true
+    User.findOneAndUpdate({userName: username}, updated, () =>{
+      return res.status(200).send({message: 'User deactivated correctly'})
+    })
   })
 }
 

@@ -5,11 +5,11 @@ const enumerator = require('../middlewares/enumStructures');
 
 const UserSchema = new Schema({
 	userName: {
-    	type: String,
-	    unique: true,
-	    required: true,
-	    minlength: 5,
-	    maxlength: 50
+  	type: String,
+    unique: true,
+	  required: true,
+	  minlength: 5,
+	  maxlength: 50
 	},
 	firstName: { type: String, required: true, maxlength: 50 },
 	lastName: { type: String, required: true, maxlength: 50 },
