@@ -127,17 +127,20 @@ function getUser(req, res) {
   });
 }
 
-function updateUser(req, res) {
-  let updated = req.body;
-  let userId = req.params.userId;
+async function updateUser(req, res) {
+  let userID = req.params.userId
+  let update = req.body
+  update.password = await helpers.encriptarPassword(req.body.password);
 
-  User.findOneAndUpdate(userId, updated, (err, oldUser) => {
-    if (err)
-      return res
-        .status(500)
-        .send({ message: `Error al actualizar usuario: ${err}` });
-    res.status(200).send({ oldUser });
-  });
+  User.findByIdAndUpdate(userID, update, (err, oldUser) => {
+      if (err) res.status(500).send({
+          message: `Error al actualizar el usuario: ${err}`
+      })
+
+      res.status(200).send({
+          user: oldUser
+      })
+  })
 }
 
 function deleteUser(req, res) {
