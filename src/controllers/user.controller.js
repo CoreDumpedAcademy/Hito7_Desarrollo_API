@@ -2,35 +2,25 @@
 const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
-/*
-function logUser(req, res) {
-  const logUser = new User(req.body);
 
-  User.findOne({ userName: logUser.userName })
-    .select("+password")
-    .exec((err, user) => {
-      if (err)
-        return res
-          .status(500)
-          .send({ message: `Error al realizar la petición: ${err}` });
-      if (!user)
-        return res.status(404).send({ message: "El usuario no existe" });
-
-      return user.comparePassword(logUser.password, (err, isMatch) => {
-        if (err)
-          return res.status(500).send({ message: `Error al ingresar: ${err}` });
-        if (!isMatch)
-          return res
-            .status(404)
-            .send({ message: "Usuario o contraseña incorrectos" });
-
-        return res.status(200).send({
-          message: "Te has logueado correctamente",
-        });
-      });
-    });
+//Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
+async function logUser(req, res) {
+  const logUser = req.body;
+  let logueado = false;
+  User.findOne({ userName: logUser.userName }, async function (err, user) {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` });
+    console.log(user);
+    if (!user) return res.status(404).send({ message: "El usuario no existe" });
+    logueado = await helpers.compararPassword(logUser.password.toString(), user.password.toString());
+    if (logueado) {
+      return res.status(200).send({ message: "Te has logueado correctamente" });
+    } else {
+      return res.status(404).send({ message: "Usuario o contraseña incorrectos" });
+    }
+  });
 }
-*/
+
+// Crear usuario
 async function createUser (req, res) {
   if(req.body != null){
     console.log(req.body);
@@ -171,6 +161,6 @@ module.exports = {
   getAllUsers,
   getInactiveUsers,
   activate,
-  deactivate
- // logUser
+  deactivate,
+  logUser
 };

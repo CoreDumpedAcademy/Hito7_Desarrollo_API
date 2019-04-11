@@ -19,7 +19,6 @@ const UserSchema = new Schema({
 	isActive: {type: Boolean, default: true},
 	password: {
 		type: String,
-	  select: false,
 		required: true
 	},
 	signUp: {type: Date, default: Date.now()},

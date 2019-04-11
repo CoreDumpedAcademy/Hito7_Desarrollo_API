@@ -6,7 +6,7 @@ const api = express.Router()
 const userController = require('../controllers/user.controller')
 
 api.post('/user', userController.createUser);
-//api.post('/logUser', userController.logUser);
+api.post('/logUser', userController.logUser);
 api.get('/user/:userId', userController.getUser);
 
 // GET DE VARIOS USUARIOS
