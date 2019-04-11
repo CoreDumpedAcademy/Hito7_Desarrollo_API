@@ -1,7 +1,7 @@
 const newsapi_config = require('../newsapi_token')
 const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(newsapi_config.token);
-const enume = require("../middlewares/enumStructures");
+const newsStructs = require("../middlewares/newsStructures");
 
 /**
  * 
@@ -48,7 +48,7 @@ async function getNews(req, res) {
     console.log(req.query)
 
     //si no se indica idioma, se utilizará inglés
-    if (!enume.languagesArray.includes(idioma)) {
+    if (!newsStructs.languagesArray.includes(idioma)) {
         idioma = 'en'
     }
 
