@@ -2,6 +2,7 @@
 const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
+
 //Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
 async function logUser(req, res) {
   const logUser = req.body;
@@ -18,30 +19,68 @@ async function logUser(req, res) {
     }
   });
 }
-//Creamos el user, hasemos la pw que recibis en el body del request.
-async function createUser(req, res) {
-  let user = null;
-  if (req.body != null) {
+
+// Crear usuario
+async function createUser (req, res) {
+  if(req.body != null){
     console.log(req.body);
-    user = new User();
-    user.userName = req.body.userName;
-    user.firstName = req.body.firstName;
-    user.lastName = req.body.lastName;
-    user.password = await helpers.encriptarPassword(req.body.password);
-    console.log(user);
-    user.save((err, userStored) => {
-      console.log(userStored);
-      if (err) return res.status(500).send({ message: `Error al salvar la base de datos ${err}` })
-      return res.status(200).send({
-        message: 'Usuario creado correctamente',
-      })
-    })
-  } else {
-    res.status(500).send('No mandes request vacias');
-  }
+    var user = new User(req.body)
+    user.password = await helpers.encriptarPassword(req.body.password)
+	  console.log(user);
+	  user.save((err, userStored) => {
+	  console.log(userStored);
+	    if(err) return res.status(500).send({message: `Error al salvar la base de datos ${err}`})
+	    return res.status(200).send( { 
+	      message: 'Usuario creado correctamente',
+	    })
+	  })
+	}else{
+		res.status(500).send('No mandes request vacias');
+	}
 }
-//Devuelve una lista con todos los users de la BD.
-function getUserList(req, res) {
+
+
+// LAS DOS FUNCIONES SIGUIENTES SIRVEN PARA ACTIVAR O DESACTIVAR EL USUARIO (BORRADO LÓGICO)
+// PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL NOMBRE DE USUARIO AL QUE ACTIVAR - DESACTIVAR
+function deactivate(req, res) {
+  var username = req.params.username
+  User.findOne({userName: username}, (err, updated) => {
+    if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if(!updated) return res.status(404).send({message: 'Error 404' })
+    updated.isActive = false
+    User.findOneAndUpdate({userName: username}, updated, () =>{
+      return res.status(200).send({message: 'User deactivated correctly'})
+    })
+  })
+}
+
+function activate(req, res) {
+  var username = req.params.username
+  User.findOne({userName: username}, (err, updated) => {
+    if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if(!updated) return res.status(404).send({message: 'Error 404' })
+    updated.isActive = true
+    User.findOneAndUpdate({userName: username}, updated, () =>{
+      return res.status(200).send({message: 'User deactivated correctly'})
+    })
+  })
+}
+
+
+// ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS ACTIVOS
+function getActiveUsers(req, res) {
+  User.find({isActive: true}, (err, users) => {
+    if (err)
+      return res
+        .status(500)
+        .send({ message: `Error al realizar la petición: ${err}` });
+    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+
+    res.status(200).send({ users });
+  });
+}
+// ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS
+function getAllUsers(req, res) {
   User.find({}, (err, users) => {
     if (err)
       return res
@@ -52,7 +91,19 @@ function getUserList(req, res) {
     res.status(200).send({ users });
   });
 }
-//Devuelve el user al que corresponde el id dado.
+// ESTA FUNCIÓN DEVUELVE LOS USUARIOS INACTIVOS
+function getInactiveUsers(req, res) {
+  User.find({isActive: false}, (err, users) => {
+    if (err)
+      return res
+        .status(500)
+        .send({ message: `Error al realizar la petición: ${err}` });
+    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+
+    res.status(200).send({ users });
+  });
+}
+
 function getUser(req, res) {
   let userId = req.params.userId;
 
@@ -65,20 +116,21 @@ function getUser(req, res) {
     res.status(200).send({ user });
   });
 }
-//actualizamos la informacion del usuario, hasheamos su pw.
+
 async function updateUser(req, res) {
-  let updated = req.body;
-  let userId = req.params.userId;
-  let hash = await helpers.encriptarPassword(updated.password);
-  updated.password = hash;
-  console.log(updated);
-  User.findOneAndUpdate(userId, updated, (err, oldUser) => {
-    if (err)
-      return res
-        .status(500)
-        .send({ message: `Error al actualizar usuario: ${err}` });
-    res.status(200).send({ oldUser });
-  });
+  let userID = req.params.userId
+  let update = req.body
+  update.password = await helpers.encriptarPassword(req.body.password);
+
+  User.findByIdAndUpdate(userID, update, (err, oldUser) => {
+      if (err) res.status(500).send({
+          message: `Error al actualizar el usuario: ${err}`
+      })
+
+      res.status(200).send({
+          user: oldUser
+      })
+  })
 }
 
 function deleteUser(req, res) {
@@ -105,6 +157,10 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
-  getUserList,
-  logUser,
+  getActiveUsers,
+  getAllUsers,
+  getInactiveUsers,
+  activate,
+  deactivate,
+  logUser
 };

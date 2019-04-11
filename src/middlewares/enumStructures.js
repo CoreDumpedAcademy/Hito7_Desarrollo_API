@@ -2,11 +2,18 @@
 const role = [
 	'admin',
 	'baseUser'
-];
+]
 const modelsName = {
-		user:'User',
+	user:'User',
 }
+const gender = [
+	'Male',
+	'Female',
+	'Other'
+]
+
 module.exports = {
 	role,
 	modelsName,
+	gender,
 };
