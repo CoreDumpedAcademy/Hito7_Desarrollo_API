@@ -16,8 +16,7 @@ const UserSchema = new Schema({
 	role: { type: String, enum: enumerator.role, default: enumerator.role[1] },
 	password: {
 		type: String,
-	    select: false,
-			required: true
+		required: true
 	}
 });
 

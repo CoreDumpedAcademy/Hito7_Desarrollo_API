@@ -2,35 +2,23 @@
 const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
-/*
+//Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
 function logUser(req, res) {
-  const logUser = new User(req.body);
-
-  User.findOne({ userName: logUser.userName })
-    .select("+password")
-    .exec((err, user) => {
-      if (err)
-        return res
-          .status(500)
-          .send({ message: `Error al realizar la petición: ${err}` });
-      if (!user)
-        return res.status(404).send({ message: "El usuario no existe" });
-
-      return user.comparePassword(logUser.password, (err, isMatch) => {
-        if (err)
-          return res.status(500).send({ message: `Error al ingresar: ${err}` });
-        if (!isMatch)
-          return res
-            .status(404)
-            .send({ message: "Usuario o contraseña incorrectos" });
-
-        return res.status(200).send({
-          message: "Te has logueado correctamente",
-        });
-      });
-    });
+  const logUser = req.body;
+  let logueado = false;
+  User.findOne({ userName: logUser.userName }, function(err, user){
+    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` });
+	console.log(user);
+    if (!user) return res.status(404).send({ message: "El usuario no existe" });
+    logueado = helpers.compararPassword(logUser.password.toString(), user.password.toString());
+    if(logueado){
+    	return res.status(200).send({message: "Te has logueado correctamente"});
+    }else{
+    	return res.status(404).send({ message: "Usuario o contraseña incorrectos" });
+    }
+  });
 }
-*/
+//Creamos el user, hasemos la pw que recibis en el body del request.
 async function createUser (req, res) {
   let user = null;
   if(req.body != null){
@@ -52,7 +40,7 @@ async function createUser (req, res) {
 		res.status(500).send('No mandes request vacias');
 	}
 }
-
+//Devuelve una lista con todos los users de la BD.
 function getUserList(req, res) {
   User.find({}, (err, users) => {
     if (err)
@@ -64,7 +52,7 @@ function getUserList(req, res) {
     res.status(200).send({ users });
   });
 }
-
+//Devuelve el user al que corresponde el id dado.
 function getUser(req, res) {
   let userId = req.params.userId;
 
@@ -77,11 +65,13 @@ function getUser(req, res) {
     res.status(200).send({ user });
   });
 }
-
-function updateUser(req, res) {
+//actualizamos la informacion del usuario, hasheamos su pw.
+async function updateUser(req, res) {
   let updated = req.body;
   let userId = req.params.userId;
-
+  let hash = await helpers.encriptarPassword(updated.password);
+  updated.password = hash;
+  console.log(updated);
   User.findOneAndUpdate(userId, updated, (err, oldUser) => {
     if (err)
       return res
@@ -116,5 +106,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserList,
- // logUser
+  logUser,
 };
