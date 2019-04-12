@@ -1,11 +1,16 @@
 'use strict'
+/**
+ * Roles que soporta el usuario
+ */
 const role = [
 	'admin',
 	'baseUser'
 ]
+
 const modelsName = {
-	user:'User',
+	user:'User'
 }
+
 const gender = [
 	'Male',
 	'Female',
@@ -15,5 +20,5 @@ const gender = [
 module.exports = {
 	role,
 	modelsName,
-	gender,
+	gender
 };
