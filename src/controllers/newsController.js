@@ -90,8 +90,37 @@ async function getNews(req, res) {
         })
     }
 }
-
+async function getTopHeadLines(req, res){
+	try{
+	let headLine = req.query;
+	let idioma = 'en';
+	let busqueda = null;
+	let pais = 'us';
+	let categorias = null;
+	console.log(headLine);
+	if(headLine != undefined){
+		if(headLine.lang != null && newsStructs.languagesArray.includes(headline.lang)) idioma = headLine.lang;
+		if(headLine.q != null) busqueda = headLine.q;
+		if(headLine.country != null && newsStructs.countriesArray.includes(headLine.country)) pais = headLine.country;
+		if(headLine.category != null && newsStructs.categoryArray.contains(headLines.category)) categorias = headLine.category;
+	}
+		console.log('LANG: ' + idioma + ' q ' + busqueda + ' categorias: ' + categorias + ' country: ' + pais)
+		await newsapi.v2.topHeadlines({
+			q:busqueda,
+			category:categorias,
+			language:idioma,
+			country:pais
+		}).then((response) => {
+			res.status(200).send(response);
+		}).catch(err => {
+			res.status(500).send({Message:`ERROR: ${err}`});
+		});
+	}catch(e){
+		console.log(e);
+	}
+}
 module.exports = {
     getNews,
-    getSources
+    getSources,
+	getTopHeadLines,
 }

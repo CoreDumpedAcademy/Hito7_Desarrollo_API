@@ -12,5 +12,6 @@ const newsController = require('../controllers/newsController')
  *  los parametros son opcionales y se pueden enviar en cualquier orden
  * */
 api.get('/news', newsController.getNews);
+api.get('/topHeadLines', newsController.getTopHeadLines);
 
 module.exports = api;
