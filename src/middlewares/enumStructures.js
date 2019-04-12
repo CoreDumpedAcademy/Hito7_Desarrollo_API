@@ -5,16 +5,20 @@
 const role = [
 	'admin',
 	'baseUser'
-];
+]
+
 const modelsName = {
-		user:'User',
+	user:'User'
 }
 
+const gender = [
+	'Male',
+	'Female',
+	'Other'
+]
 
-/**
- * Exportamos las diferentes variables para su posterior uso
- */
 module.exports = {
 	role,
-	modelsName
+	modelsName,
+	gender
 };

@@ -4,6 +4,7 @@ const app = express();
 var apiUser = require('./routes/user.routes')
 var apiNews = require('./routes/newsRoutes')
 const cors = require('cors')
+const colors = require('colors')
 
 app.use(cors())
 
