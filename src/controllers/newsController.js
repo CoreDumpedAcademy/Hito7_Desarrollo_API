@@ -20,7 +20,6 @@ async function getSources(idioma) {
         for (var i = 0; i < sourcesLength; i++) {
             sourcesArray += response.sources[i].id + ", "
         }
-        console.log("s: " + sourcesArray)
     }).catch(err => {
         console.log(err)
         return 'fox-news'
@@ -90,16 +89,18 @@ async function getNews(req, res) {
     }
 
     //Si pagina no es un numero entero se mostraran resultados de la pagina 1
-    if (!Number.isInteger(pagina) || tamañoPagina<1){
+    if (pagina===undefined || pagina<1){
         pagina = 1
     }
 
     //Si el tamaño de la pagina no es un numero pues se utilizara 20(se mostraran 20 noticias)
-    if (!Number.isInteger(tamañoPagina) || tamañoPagina<1){
+    if (tamañoPagina===undefined || tamañoPagina<1 || tamañoPagina>99){
         tamañoPagina = 20
     }
 
-    console.log(fuentes)
+    console.log(tamañoPagina)
+
+    console.log("FUENTES DE LA NOTICIA:\n"+fuentes)
 
     //Si la busqueda resulta undefined (no realiza busqueda)
     if (busqueda === undefined) {
