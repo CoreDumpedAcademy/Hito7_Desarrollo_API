@@ -90,6 +90,7 @@ async function getNews(req, res) {
         })
     }
 }
+//Funcion para obtener las cabeceras de los articulos más vistos, se puede filtrar por pais categoría y keyWord.
 async function getTopHeadLines(req, res){
 	try{
 	let headLine = req.query;
