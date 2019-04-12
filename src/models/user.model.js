@@ -14,12 +14,13 @@ const UserSchema = new Schema({
 	firstName: { type: String, required: true, maxlength: 50 },
 	lastName: { type: String, required: true, maxlength: 50 },
 	role: { type: String, enum: enumerator.role, default: enumerator.role[1] },
+	favNews: {type: [String]}, // ARRAY DE TITULARES DE NOTICIAS
 	password: {
 		type: String,
 	    select: false,
 			required: true
 	}
-});
+})
 
 module.exports = mongoose.model(
   enumerator.modelsName.user,

@@ -109,6 +109,31 @@ function deleteUser(req, res) {
     });
   });
 }
+// A ESTA FUNCION SE LE PASA COMO PARAMETRO UN USUARIO Y TE DEVUELVE LAS NOTICIAS FAVORITAS DE ESTE USER
+function showFavNews(req, res){
+  var param = req.params.user
+  User.find({userName: param}, (err, user)=>{
+    if (err) return res.status(500).send({message:`Error al buscar al usuario ${err}`})
+    if (!user) return res.status(404).send({message:`El usuario no existe`})
+    console.log(user.favNews)
+    /*for(var i=0;i<user.favNews.length;i++){
+      console.log("patata")
+    }*/
+    res.status(200).send({message:"hola"})
+  })
+}
+// A ESTA FUNCION SE LE PASAN DOS PARAMETROS: EL USUARIO Y LA NOTICIA. LA NOTICIA VA EN EL BODY. AÑADE DICHA NOTICIA A SUS FAVS
+// LA ESTRUCTURA DEL BODY ES _id: {string}, url: {string}. Esto se puede modificar facilmente en el modelo de usuario.
+function addFavNew(req, res){
+  var noticia = req.body.title
+  console.log(noticia)
+  console.log(req.params.user)
+  User.findOneAndUpdate({userName: req.params.user}, {$push: {favNews: noticia}}, (err, updated)=>{
+    if(err) return res.status(500).send({message: `Error al actualizar el usuario ${err}`})
+    if(!updated) return res.status(404).send({message: "El usuario no existe"})
+    return res.status(200).send({message: "Usuario actualizado correctamente"})
+  })
+}
 
 module.exports = {
   createUser,
@@ -116,5 +141,7 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserList,
+  showFavNews,
+  addFavNew,
  // logUser
 };

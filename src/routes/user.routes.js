@@ -12,4 +12,7 @@ api.get('/users', userController.getUserList);
 api.put('/user', userController.updateUser);
 api.delete('/user/:userId', userController.deleteUser);
 
+api.get('/favNews/:user', userController.showFavNews) // OBTENER NOTICIAS FAVORITAS DEL USUARIO
+api.put('/favNews/:user', userController.addFavNew) // AÑADIR NOTICIAS FAVORITAS AL USUARIO
+
 module.exports = api;
