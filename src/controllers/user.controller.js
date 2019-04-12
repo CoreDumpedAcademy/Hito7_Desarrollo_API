@@ -7,7 +7,7 @@ const helpers = require('../lib/helpers.js');
 async function logUser(req, res) {
   const logUser = req.body;
   let logueado = false;
-  User.findOne({ userName: logUser.userName }, async function (err, user) {
+  User.findOne({ email: logUser.email }, async function (err, user) {
     if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` });
     console.log(user);
     if (!user) return res.status(404).send({ message: "El usuario no existe" });
