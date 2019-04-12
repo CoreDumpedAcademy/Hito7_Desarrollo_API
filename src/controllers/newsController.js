@@ -40,11 +40,14 @@ function checkDates(date){
  * @param {*} req 
  * @param {*} res 
  * Esta function obtiene todas las noticias 
- * Los filtros que soporta son idioma, fuentes y query (busqueda)  
+ * Los filtros que soporta son idioma, fuentes, query (busqueda), sortBy, pagina, noticias por pagina, from Date, until Date:: Date = YYYY-MM-DD  
+ * Para hacer el uso de filtro Pais o Categoria usar el Endpoint TopHeadlines
  * idioma por defecto: en (inglés)
  * Sources por defecto: *
  * query (búsqueda) por defecto: *
- * TO-DO: Añadir soporte para buscar por fechas y ordenar 
+ * ordenar por defecto: popularity
+ * from por defecto: 1 mes antes (maximo que soporta newsapi con el plan developer)
+ * until por defecto: ahora mismo
  **/
 async function getNews(req, res) {
 
@@ -70,10 +73,6 @@ async function getNews(req, res) {
         untilDate+=""
     }
 
-    console.log(req.query)
-
-    console.log(fromDate+ " -- " +untilDate)
-
     //si no se indica idioma, se utilizará inglés
     if (!newsStructs.languagesArray.includes(idioma)) {
         idioma = 'en'
@@ -97,10 +96,6 @@ async function getNews(req, res) {
     if (tamañoPagina===undefined || tamañoPagina<1 || tamañoPagina>99){
         tamañoPagina = 20
     }
-
-    console.log(tamañoPagina)
-
-    console.log("FUENTES DE LA NOTICIA:\n"+fuentes)
 
     //Si la busqueda resulta undefined (no realiza busqueda)
     if (busqueda === undefined) {
@@ -127,6 +122,8 @@ async function getNews(req, res) {
             language: idioma,
             //category: categoria, Igual que lo otro
             q: busqueda,
+            from: fromDate,
+            to: untilDate,
             sortBy: ordenar,
             page: pagina,
             pageSize: tamañoPagina
