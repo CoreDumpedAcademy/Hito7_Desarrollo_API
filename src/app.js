@@ -1,9 +1,10 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express();
-const apiUser = require('./routes/user.routes')
-const apiNews = require('./routes/newsRoutes')
+var apiUser = require('./routes/user.routes')
+var apiNews = require('./routes/newsRoutes')
 const cors = require('cors')
+const colors = require('colors')
 
 app.use(cors())
 

@@ -2,6 +2,7 @@ const newsapi_config = require('../newsapi_token')
 const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(newsapi_config.token);
 const newsStructs = require("../middlewares/newsStructures");
+var moment = require('moment');
 
 /**
  * 
@@ -19,7 +20,6 @@ async function getSources(idioma) {
         for (var i = 0; i < sourcesLength; i++) {
             sourcesArray += response.sources[i].id + ", "
         }
-        console.log("s: " + sourcesArray)
     }).catch(err => {
         console.log(err)
         return 'fox-news'
@@ -27,16 +27,27 @@ async function getSources(idioma) {
     return sourcesArray
 }
 
+function checkDates(date){
+    if(!moment(date, moment.ISO_8601).isValid() && !moment(date,"YYYY-MM-DD").isValid()){
+        return false
+    }else{
+        return true
+    }
+}
+
 /**
  * 
  * @param {*} req 
  * @param {*} res 
  * Esta function obtiene todas las noticias 
- * Los filtros que soporta son idioma, fuentes y query (busqueda)  
+ * Los filtros que soporta son idioma, fuentes, query (busqueda), sortBy, pagina, noticias por pagina, from Date, until Date:: Date = YYYY-MM-DD  
+ * Para hacer el uso de filtro Pais o Categoria usar el Endpoint TopHeadlines
  * idioma por defecto: en (inglés)
  * Sources por defecto: *
  * query (búsqueda) por defecto: *
- * TO-DO: Añadir soporte para buscar por fechas y ordenar 
+ * ordenar por defecto: popularity
+ * from por defecto: 1 mes antes (maximo que soporta newsapi con el plan developer)
+ * until por defecto: ahora mismo
  **/
 async function getNews(req, res) {
 
@@ -44,12 +55,31 @@ async function getNews(req, res) {
     var idioma = req.query.lang
     var busqueda = req.query.q
     var fuentes = req.query.sources
+    var pagina = req.query.page
+    var tamañoPagina = req.query.pageSize
+    var fromDate = req.query.from
+    var untilDate = req.query.until
+    var ordenar = req.query.sortBy
 
-    console.log(req.query)
+    //si las fechas no corresponden se pone esas por defecto
+    if(!checkDates(fromDate) || fromDate===undefined){
+        fromDate = new Date(moment().format("YYYY-MM-DD"))
+        fromDate.setMonth(fromDate.getMonth()-1)
+        fromDate+=""
+    }
+
+    if(!checkDates(untilDate) || untilDate===undefined){
+        untilDate = new Date(moment().format("YYYY-MM-DD"))
+        untilDate+=""
+    }
 
     //si no se indica idioma, se utilizará inglés
     if (!newsStructs.languagesArray.includes(idioma)) {
         idioma = 'en'
+    }
+
+    if (!newsStructs.SortByArray.includes(ordenar)) {
+        ordenar = 'popularity'
     }
 
     //si no se indica una fuente se utilizaran todas del idioma seleccionado
@@ -57,7 +87,15 @@ async function getNews(req, res) {
         fuentes = await getSources(idioma)
     }
 
-    console.log(fuentes)
+    //Si pagina no es un numero entero se mostraran resultados de la pagina 1
+    if (pagina===undefined || pagina<1){
+        pagina = 1
+    }
+
+    //Si el tamaño de la pagina no es un numero pues se utilizara 20(se mostraran 20 noticias)
+    if (tamañoPagina===undefined || tamañoPagina<1 || tamañoPagina>99){
+        tamañoPagina = 20
+    }
 
     //Si la busqueda resulta undefined (no realiza busqueda)
     if (busqueda === undefined) {
@@ -65,9 +103,12 @@ async function getNews(req, res) {
             sources: fuentes,
             //country: pais, Parece ser que la api no lo soporta
             language: idioma,
+            from: fromDate,
+            to: untilDate,
             //category: categoria, Igual que lo otro
-            sortBy: 'relevancy',
-            page: 2
+            sortBy: ordenar,
+            page: pagina,
+            pageSize: tamañoPagina
         }).then(response => {
             res.status(200).send({
                 response
@@ -85,8 +126,11 @@ async function getNews(req, res) {
             language: idioma,
             //category: categoria, Igual que lo otro
             q: busqueda,
-            sortBy: 'relevancy',
-            page: 2
+            from: fromDate,
+            to: untilDate,
+            sortBy: ordenar,
+            page: pagina,
+            pageSize: tamañoPagina
         }).then(response => {
             res.status(200).send({
                 response

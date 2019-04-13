@@ -102,6 +102,11 @@ var categoriesArray = [
 	"business, entertainment, general, health, science, sports, technology" //todas las categorias
 ]
 
+var SortByArray = [
+	"relevancy", //Articulos mas cercanos a q
+	"popularity", //Articulos con fuentes/periodistas mas populares van antes
+	"publishedAt" //Los articulos más nuevos van antes
+]
 
 /**
  * Exportamos las diferentes variables para su posterior uso
@@ -110,5 +115,6 @@ module.exports = {
 	paramNewsArray,
 	countriesArray,
 	languagesArray,
-	categoriesArray
+	categoriesArray,
+	SortByArray
 };
