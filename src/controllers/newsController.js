@@ -53,7 +53,7 @@ async function getNews(req, res) {
     }
 
     //si no se indica una fuente se utilizaran todas del idioma seleccionado
-    if(fuentes===undefined){
+    if (fuentes === undefined) {
         fuentes = await getSources(idioma)
     }
 
@@ -69,11 +69,15 @@ async function getNews(req, res) {
             sortBy: 'relevancy',
             page: 2
         }).then(response => {
-            res.status(200).send({ response })
+            res.status(200).send({
+                response
+            })
         }).catch(err => {
-            res.status(500).send({Message:`Error: ${err}`})
+            res.status(500).send({
+                Message: `Error: ${err}`
+            })
         })
-    //Si se incluye una query (busqueda)
+        //Si se incluye una query (busqueda)
     } else {
         await newsapi.v2.everything({
             sources: fuentes,
@@ -84,44 +88,69 @@ async function getNews(req, res) {
             sortBy: 'relevancy',
             page: 2
         }).then(response => {
-            res.status(200).send({ response })
+            res.status(200).send({
+                response
+            })
         }).catch(err => {
-            res.status(500).send({Message:`Error: ${err}`})
+            res.status(500).send({
+                Message: `Error: ${err}`
+            })
         })
     }
 }
 //Funcion para obtener las cabeceras de los articulos más vistos, se puede filtrar por pais categoría y keyWord.
-async function getTopHeadLines(req, res){
-	try{
-	let headLine = req.query;
-	let idioma = 'en';
-	let busqueda = null;
-	let pais = 'us';
-	let categorias = null;
-	console.log(headLine);
-	if(headLine != undefined){
-		if(headLine.lang != null && newsStructs.languagesArray.includes(headline.lang)) idioma = headLine.lang;
-		if(headLine.q != null) busqueda = headLine.q;
-		if(headLine.country != null && newsStructs.countriesArray.includes(headLine.country)) pais = headLine.country;
-		if(headLine.category != null && newsStructs.categoryArray.contains(headLines.category)) categorias = headLine.category;
-	}
-		console.log('LANG: ' + idioma + ' q ' + busqueda + ' categorias: ' + categorias + ' country: ' + pais)
-		await newsapi.v2.topHeadlines({
-			q:busqueda,
-			category:categorias,
-			language:idioma,
-			country:pais
-		}).then((response) => {
-			res.status(200).send(response);
-		}).catch(err => {
-			res.status(500).send({Message:`ERROR: ${err}`});
-		});
-	}catch(e){
-		console.log(e);
-	}
+async function getTopHeadLines(req, res) {
+    try {
+        let headLine = req.query;
+        let busqueda = req.query.q
+        let pais = 'us';
+        let categorias = 'general';
+        let page = 1
+        let pageSize = 20
+
+        console.log(headLine);
+        if (headLine != undefined) {
+            if (headLine.country != undefined && newsStructs.countriesArray.includes(headLine.country)) pais = headLine.country;
+            if (headLine.category != undefined && newsStructs.categoriesArray.includes(headLine.category)) categorias = headLine.category;
+            if (headLine.page != undefined && headLine.page > 0) page = headLine.page
+            if (headLine.pageSize != undefined && headLine.pageSize > 0 && headLine.pageSize < 100) pageSize = headLine.pageSize
+        }
+        console.log(' q ' + busqueda + ' categorias: ' + categorias + ' country: ' + pais + ' page: '+ page + ' pagesize: '+ pageSize)
+
+        if (busqueda === undefined) {
+            await newsapi.v2.topHeadlines({
+                category: categorias,
+                country: pais,
+                page: page,
+                pageSize: pageSize
+            }).then((response) => {
+                res.status(200).send(response);
+            }).catch(err => {
+                res.status(500).send({
+                    Message: `ERROR: ${err}`
+                });
+            });
+        } else {
+            await newsapi.v2.topHeadlines({
+                q: busqueda,
+                category: categorias,
+                country: pais,
+                page: page,
+                pageSize: pageSize
+            }).then((response) => {
+                res.status(200).send(response);
+            }).catch(err => {
+                res.status(500).send({
+                    Message: `ERROR: ${err}`
+                });
+            });
+        }
+    } catch (e) {
+        console.log(e);
+    }
 }
 module.exports = {
     getNews,
     getSources,
-	getTopHeadLines,
+    getTopHeadLines,
 }
