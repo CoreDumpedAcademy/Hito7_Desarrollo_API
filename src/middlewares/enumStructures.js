@@ -8,7 +8,7 @@ const role = [
 ]
 
 const modelsName = {
-	user:'User'
+	user: 'User'
 }
 
 const gender = [

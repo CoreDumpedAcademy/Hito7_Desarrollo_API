@@ -2,7 +2,8 @@
 const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
-
+const service = require('../service');
+/*
 //Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
 async function logUser(req, res) {
   const logUser = req.body;
@@ -19,7 +20,24 @@ async function logUser(req, res) {
     }
   });
 }
+*/
 
+// Funcion logUser Modificado
+function logUser(req, res) {
+  User.findOne({ email: req.body.email }, (err, user) => {
+    if (err)
+      return res.status(500).send({ message: err })
+    if (!user)
+      return res.status(404).send({ message: 'No existe el usuario,' })
+
+    req.user = user
+    res.status(200).send({
+      message: 'Login Correcto',
+      token: service.createToken(user)
+    })
+  })
+}
+/*
 // Crear usuario
 async function createUser (req, res) {
   if(req.body != null){
@@ -38,30 +56,52 @@ async function createUser (req, res) {
 		res.status(500).send('No mandes request vacias');
 	}
 }
+*/
+
+// Funcion crear usuario modificada
+function createUser(req, res, next) {
+  console.log('POST /api/user')
+  console.log(req.body)
+
+  var user = new User(req.body)
+
+  User.findOne({ email: req.body.email }, (err, existingUser) => {
+    if (existingUser) {
+      return res.status(400).send('Este email ya esta registrado');
+    }
+    user.save((err) => {
+      if (err) {
+        res.status(500).send({ message: 'Error al crear el usuario' }),
+          next(err);
+      }
+      return res.status(200).send({ token: service.createToken(user) })
+    })
+  })
+}
 
 
 // LAS DOS FUNCIONES SIGUIENTES SIRVEN PARA ACTIVAR O DESACTIVAR EL USUARIO (BORRADO LÓGICO)
 // PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL NOMBRE DE USUARIO AL QUE ACTIVAR - DESACTIVAR
 function deactivate(req, res) {
   var username = req.params.username
-  User.findOne({userName: username}, (err, updated) => {
-    if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
-    if(!updated) return res.status(404).send({message: 'Error 404' })
+  User.findOne({ userName: username }, (err, updated) => {
+    if (err) return res.status(500).send({ message: `Error al desactivar el usuario ${err}` })
+    if (!updated) return res.status(404).send({ message: 'Error 404' })
     updated.isActive = false
-    User.findOneAndUpdate({userName: username}, updated, () =>{
-      return res.status(200).send({message: 'User deactivated correctly'})
+    User.findOneAndUpdate({ userName: username }, updated, () => {
+      return res.status(200).send({ message: 'User deactivated correctly' })
     })
   })
 }
 
 function activate(req, res) {
   var username = req.params.username
-  User.findOne({userName: username}, (err, updated) => {
-    if(err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
-    if(!updated) return res.status(404).send({message: 'Error 404' })
+  User.findOne({ userName: username }, (err, updated) => {
+    if (err) return res.status(500).send({ message: `Error al desactivar el usuario ${err}` })
+    if (!updated) return res.status(404).send({ message: 'Error 404' })
     updated.isActive = true
-    User.findOneAndUpdate({userName: username}, updated, () =>{
-      return res.status(200).send({message: 'User deactivated correctly'})
+    User.findOneAndUpdate({ userName: username }, updated, () => {
+      return res.status(200).send({ message: 'User deactivated correctly' })
     })
   })
 }
@@ -69,7 +109,7 @@ function activate(req, res) {
 
 // ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS ACTIVOS
 function getActiveUsers(req, res) {
-  User.find({isActive: true}, (err, users) => {
+  User.find({ isActive: true }, (err, users) => {
     if (err)
       return res
         .status(500)
@@ -93,7 +133,7 @@ function getAllUsers(req, res) {
 }
 // ESTA FUNCIÓN DEVUELVE LOS USUARIOS INACTIVOS
 function getInactiveUsers(req, res) {
-  User.find({isActive: false}, (err, users) => {
+  User.find({ isActive: false }, (err, users) => {
     if (err)
       return res
         .status(500)
@@ -123,13 +163,13 @@ async function updateUser(req, res) {
   update.password = await helpers.encriptarPassword(req.body.password);
 
   User.findByIdAndUpdate(userID, update, (err, oldUser) => {
-      if (err) res.status(500).send({
-          message: `Error al actualizar el usuario: ${err}`
-      })
+    if (err) res.status(500).send({
+      message: `Error al actualizar el usuario: ${err}`
+    })
 
-      res.status(200).send({
-          user: oldUser
-      })
+    res.status(200).send({
+      user: oldUser
+    })
   })
 }
 
