@@ -1,4 +1,3 @@
-
 const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
@@ -23,18 +22,35 @@ async function logUser(req, res) {
 */
 
 // Funcion logUser Modificado
+
 function logUser(req, res) {
-  User.findOne({ email: req.body.email }, (err, user) => {
+  var logged = false
+  User.findOne({
+    email: req.body.email
+  }, async (err, user) => {
     if (err)
-      return res.status(500).send({ message: err })
+      return res.status(500).send({
+        message: err
+      })
     if (!user)
-      return res.status(404).send({ message: 'No existe el usuario,' })
+      return res.status(404).send({
+        message: 'No existe el usuario,'
+      })
 
     req.user = user
-    res.status(200).send({
-      message: 'Login Correcto',
-      token: service.createToken(user)
-    })
+    logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+
+    if (logged) {
+      res.status(200).send({
+        message: 'Login Correcto',
+        token: service.createToken(user)
+      })
+    } else {
+      res.status(200).send({
+        message: 'Contraseña incorrecta',
+      })
+    }
+
   })
 }
 /*
@@ -65,16 +81,22 @@ function createUser(req, res, next) {
 
   var user = new User(req.body)
 
-  User.findOne({ email: req.body.email }, (err, existingUser) => {
+  User.findOne({
+    email: req.body.email
+  }, (err, existingUser) => {
     if (existingUser) {
       return res.status(400).send('Este email ya esta registrado');
     }
     user.save((err) => {
       if (err) {
-        res.status(500).send({ message: 'Error al crear el usuario' }),
+        res.status(500).send({
+            message: 'Error al crear el usuario'
+          }),
           next(err);
       }
-      return res.status(200).send({ token: service.createToken(user) })
+      return res.status(200).send({
+        token: service.createToken(user)
+      })
     })
   })
 }
@@ -84,24 +106,44 @@ function createUser(req, res, next) {
 // PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL NOMBRE DE USUARIO AL QUE ACTIVAR - DESACTIVAR
 function deactivate(req, res) {
   var username = req.params.username
-  User.findOne({ userName: username }, (err, updated) => {
-    if (err) return res.status(500).send({ message: `Error al desactivar el usuario ${err}` })
-    if (!updated) return res.status(404).send({ message: 'Error 404' })
+  User.findOne({
+    userName: username
+  }, (err, updated) => {
+    if (err) return res.status(500).send({
+      message: `Error al desactivar el usuario ${err}`
+    })
+    if (!updated) return res.status(404).send({
+      message: 'Error 404'
+    })
     updated.isActive = false
-    User.findOneAndUpdate({ userName: username }, updated, () => {
-      return res.status(200).send({ message: 'User deactivated correctly' })
+    User.findOneAndUpdate({
+      userName: username
+    }, updated, () => {
+      return res.status(200).send({
+        message: 'User deactivated correctly'
+      })
     })
   })
 }
 
 function activate(req, res) {
   var username = req.params.username
-  User.findOne({ userName: username }, (err, updated) => {
-    if (err) return res.status(500).send({ message: `Error al desactivar el usuario ${err}` })
-    if (!updated) return res.status(404).send({ message: 'Error 404' })
+  User.findOne({
+    userName: username
+  }, (err, updated) => {
+    if (err) return res.status(500).send({
+      message: `Error al desactivar el usuario ${err}`
+    })
+    if (!updated) return res.status(404).send({
+      message: 'Error 404'
+    })
     updated.isActive = true
-    User.findOneAndUpdate({ userName: username }, updated, () => {
-      return res.status(200).send({ message: 'User deactivated correctly' })
+    User.findOneAndUpdate({
+      userName: username
+    }, updated, () => {
+      return res.status(200).send({
+        message: 'User deactivated correctly'
+      })
     })
   })
 }
@@ -109,14 +151,22 @@ function activate(req, res) {
 
 // ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS ACTIVOS
 function getActiveUsers(req, res) {
-  User.find({ isActive: true }, (err, users) => {
+  User.find({
+    isActive: true
+  }, (err, users) => {
     if (err)
       return res
         .status(500)
-        .send({ message: `Error al realizar la petición: ${err}` });
-    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+        .send({
+          message: `Error al realizar la petición: ${err}`
+        });
+    if (!users) return res.status(404).send({
+      message: "No existen usuarios"
+    });
 
-    res.status(200).send({ users });
+    res.status(200).send({
+      users
+    });
   });
 }
 // ESTA FUNCIÓN DEVUELVE TODOS LOS USUARIOS
@@ -125,22 +175,36 @@ function getAllUsers(req, res) {
     if (err)
       return res
         .status(500)
-        .send({ message: `Error al realizar la petición: ${err}` });
-    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+        .send({
+          message: `Error al realizar la petición: ${err}`
+        });
+    if (!users) return res.status(404).send({
+      message: "No existen usuarios"
+    });
 
-    res.status(200).send({ users });
+    res.status(200).send({
+      users
+    });
   });
 }
 // ESTA FUNCIÓN DEVUELVE LOS USUARIOS INACTIVOS
 function getInactiveUsers(req, res) {
-  User.find({ isActive: false }, (err, users) => {
+  User.find({
+    isActive: false
+  }, (err, users) => {
     if (err)
       return res
         .status(500)
-        .send({ message: `Error al realizar la petición: ${err}` });
-    if (!users) return res.status(404).send({ message: "No existen usuarios" });
+        .send({
+          message: `Error al realizar la petición: ${err}`
+        });
+    if (!users) return res.status(404).send({
+      message: "No existen usuarios"
+    });
 
-    res.status(200).send({ users });
+    res.status(200).send({
+      users
+    });
   });
 }
 
@@ -151,9 +215,15 @@ function getUser(req, res) {
     if (err)
       return res
         .status(500)
-        .send({ message: `Error al realizar peticion: ${err}` });
-    if (!user) return res.status(404).send({ message: `El usuario no existe` });
-    res.status(200).send({ user });
+        .send({
+          message: `Error al realizar peticion: ${err}`
+        });
+    if (!user) return res.status(404).send({
+      message: `El usuario no existe`
+    });
+    res.status(200).send({
+      user
+    });
   });
 }
 
@@ -180,14 +250,22 @@ function deleteUser(req, res) {
     if (err)
       return res
         .status(500)
-        .send({ message: `Error al borrar usuario: ${err}` });
-    if (!user) return res.status(404).send({ message: `El usuario no existe` });
+        .send({
+          message: `Error al borrar usuario: ${err}`
+        });
+    if (!user) return res.status(404).send({
+      message: `El usuario no existe`
+    });
     user.remove(err => {
       if (err)
         return res
           .status(500)
-          .send({ message: `Error al borrar usuario: ${err}` });
-      res.status(200).send({ message: `El usuario ha sido borrado` });
+          .send({
+            message: `Error al borrar usuario: ${err}`
+          });
+      res.status(200).send({
+        message: `El usuario ha sido borrado`
+      });
     });
   });
 }
