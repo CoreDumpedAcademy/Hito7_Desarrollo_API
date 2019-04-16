@@ -281,6 +281,31 @@ function addFavNew(req, res){
     return res.status(200).send({message: "Usuario actualizado correctamente"})
   })
 }
+// ESTA FUNCIÓN OBTIENE UN INDICE DE ARRAY Y BORRA EL OBJETIO NOTICIA DE LA POSICION INDICE DEL ARRAY DE NOTICIAS DEL USUARIO
+function deleteFavArt(req,res){
+  var usern = req.params.user
+  var index = req.params.index
+  console.log(`ARTICLE DELETING ${usern} - ${index}`)
+  User.findOne({userName:usern}, (err, user) => {
+    if(err) return res.status(500).send({message: `Error al borrar la noticia: ${err}`})
+    if(!user) return res.status(404).send({message: "Usuario no encontrado"})
+    console.log(user.favNews.splice(index, 1))
+    User.findOneAndUpdate({userName:usern}, user, (err, updated) => {
+      if(err) return res.status(500).send({message: `Error ${err}`})
+      return res.status(200).send({message: "Noticia eliminada correctamente"})
+    })
+  })
+}
+
+function getByUsername(req, res){
+  const username = req.params.username
+  console.log(`GET by USERNAME ${username}`)
+  User.find({userName: username},(err, user) => {
+    if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
+    if(!user) return res.status(404).send({message: 'Usuario no encontrado'})
+    return res.status(200).send({user})
+  })
+}
 
 module.exports = {
   createUser,
@@ -293,5 +318,7 @@ module.exports = {
   activate,
   deactivate,
   logUser,
-  addFavNew
+  addFavNew,
+  getByUsername,
+  deleteFavArt
 };

@@ -7,7 +7,7 @@ const NewsSchema = new Schema({
 	author: {type: String},
 	title: {type: String, required: true},
 	url: {type: String, required: true},
-	urlToImg: {type: String},
+	urlToImage: {type: String},
 	publishedAt: {type: Date},
 	content: {type: String}
 })
@@ -24,12 +24,22 @@ const userSchema = new Schema({
 		type: String,
 		required: true
 	},
-	favNews: [NewsSchema], // ARRAY DE NOTICIAS FAVORITAS
+	favNews: {type: [NewsSchema], maxlength: 20}, // ARRAY DE NOTICIAS FAVORITAS
 	email: { type: String, required: true, maxlength: 50, unique: true },
 	signUp: { type: Date, default: Date.now() },
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
 		// TODO->AÑADIR MÁS ESTADISTICAS
+	},
+	media: {
+		banner:{
+			type: String,
+			default: "/newsapp/src/assets/images/default-images/defaultbanner"
+		},
+		picture:{
+			type: String,
+			default: "/newsapp/src/assets/images/default-images/download"
+		}
 	}
 });
 

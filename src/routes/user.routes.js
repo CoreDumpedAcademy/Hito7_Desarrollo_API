@@ -8,6 +8,7 @@ const userController = require('../controllers/user.controller')
 api.post('/user', userController.createUser);
 api.post('/logUser', userController.logUser);
 api.get('/userid/:userId', userController.getUser);
+api.get('/username/:username', userController.getByUsername)
 api.get('/user/private', auth, (req, res) => {
     res.status(200).send({ message: 'Tienes Acceso' })
 })
@@ -24,5 +25,6 @@ api.put('/user/activate/:username', userController.activate) // ACTIVAR USUARIO 
 api.put('/user/deactivate/:username',userController.deactivate) // DESACTIVAR USUARIO (SI ESTÁ ACTIVO)
 
 api.put('/favNews/:user',userController.addFavNew) // AÑADIR UNA NOTICIA AL USUARIO :user
+api.put('/favNews/:user/:index', userController.deleteFavArt) // ELIMINA LA NOTICIA FAVORITA DE LA POSICIÓN INDEX DEL USUARIO USER
 
 module.exports = api;

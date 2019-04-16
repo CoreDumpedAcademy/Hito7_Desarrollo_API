@@ -38,6 +38,8 @@ This API uses NewsApi's API to get most news from all over the world (with the A
    - /userid/:userId **PUT**: Update user
    - /user/:userID **DELETE**: Delete user
    - /user/private **GET** ||| **HEADERS**: authorization(secret + token) - Tokens Tester
+
+   -/favNews/:user **PUT**: Guarda una noticia en el array de noticias del usuario :user
    
 #### News Routes
 
