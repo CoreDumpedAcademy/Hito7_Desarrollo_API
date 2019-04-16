@@ -270,6 +270,18 @@ function deleteUser(req, res) {
   });
 }
 
+// ESTA FUNCION RECIBE UN USUARIO POR PARAMETRO Y UNA NOTICIA EN EL BODY DE LA PETICIÓN. GUARDA LA NOTICIA EN EL ARRAY DE NOTICIAS FAVORITAS DEL USUARIO
+function addFavNew(req, res){
+  var noticia = req.body
+  console.log(noticia)
+  console.log(req.params.user)
+  User.findOneAndUpdate({userName: req.params.user}, {$push: {favNews: noticia}}, (err, updated)=>{
+    if(err) return res.status(500).send({message: `Error al actualizar el usuario ${err}`})
+    if(!updated) return res.status(404).send({message: "El usuario no existe"})
+    return res.status(200).send({message: "Usuario actualizado correctamente"})
+  })
+}
+
 module.exports = {
   createUser,
   getUser,
@@ -280,5 +292,6 @@ module.exports = {
   getInactiveUsers,
   activate,
   deactivate,
-  logUser
+  logUser,
+  addFavNew
 };

@@ -21,6 +21,8 @@ api.put('/userid/:userId', userController.updateUser);
 api.delete('/user/:userId', userController.deleteUser);
 
 api.put('/user/activate/:username', userController.activate) // ACTIVAR USUARIO (SI ESTÁ INACTIVO)
-api.put('/user/deactivate/:username', userController.deactivate) // DESACTIVAR USUARIO (SI ESTÁ ACTIVO)
+api.put('/user/deactivate/:username',userController.deactivate) // DESACTIVAR USUARIO (SI ESTÁ ACTIVO)
+
+api.put('/favNews/:user',userController.addFavNew) // AÑADIR UNA NOTICIA AL USUARIO :user
 
 module.exports = api;

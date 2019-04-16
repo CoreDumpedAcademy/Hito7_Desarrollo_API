@@ -3,6 +3,15 @@ const bcrypt = require('bcrypt-nodejs');
 const Schema = mongoose.Schema;
 const enumerator = require('../middlewares/enumStructures');
 
+const NewsSchema = new Schema({
+	author: {type: String},
+	title: {type: String, required: true},
+	url: {type: String, required: true},
+	urlToImg: {type: String},
+	publishedAt: {type: Date},
+	content: {type: String}
+})
+
 const userSchema = new Schema({
 	userName: { type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
 	firstName: { type: String, required: true, maxlength: 50 },
@@ -15,6 +24,7 @@ const userSchema = new Schema({
 		type: String,
 		required: true
 	},
+	favNews: [NewsSchema], // ARRAY DE NOTICIAS FAVORITAS
 	email: { type: String, required: true, maxlength: 50, unique: true },
 	signUp: { type: Date, default: Date.now() },
 	statistics: {
