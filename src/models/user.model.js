@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 const Schema = mongoose.Schema;
 const enumerator = require('../middlewares/enumStructures');
+const enumeratorNews = require('../middlewares/newsStructures')
 
 const NewsSchema = new Schema({
 	author: {type: String},
@@ -40,6 +41,10 @@ const userSchema = new Schema({
 			type: String,
 			default: "/newsapp/src/assets/images/default-images/download"
 		}
+	},
+	preferences: {
+		favLanguage: { type: String, default: enumeratorNews.languagesArray[2] }, //en
+		favCountry: { type: String, default: enumeratorNews.countriesArray[50] } //usa
 	}
 });
 
