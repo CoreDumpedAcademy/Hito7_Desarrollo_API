@@ -2,27 +2,9 @@ const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 const service = require('../service');
-/*
-//Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
-async function logUser(req, res) {
-  const logUser = req.body;
-  let logueado = false;
-  User.findOne({ email: logUser.email }, async function (err, user) {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` });
-    console.log(user);
-    if (!user) return res.status(404).send({ message: "El usuario no existe" });
-    logueado = await helpers.compararPassword(logUser.password.toString(), user.password.toString());
-    if (logueado) {
-      return res.status(200).send({ message: "Te has logueado correctamente" });
-    } else {
-      return res.status(404).send({ message: "Usuario o contraseña incorrectos" });
-    }
-  });
-}
-*/
+
 
 // Funcion logUser Modificado
-
 function logUser(req, res) {
   var logged = false
   User.findOne({
@@ -46,33 +28,14 @@ function logUser(req, res) {
         token: service.createToken(user)
       })
     } else {
-      res.status(200).send({
+      res.status(403).send({
         message: 'Contraseña incorrecta',
       })
     }
 
   })
 }
-/*
-// Crear usuario
-async function createUser (req, res) {
-  if(req.body != null){
-    console.log(req.body);
-    var user = new User(req.body)
-    user.password = await helpers.encriptarPassword(req.body.password)
-	  console.log(user);
-	  user.save((err, userStored) => {
-	  console.log(userStored);
-	    if(err) return res.status(500).send({message: `Error al salvar la base de datos ${err}`})
-	    return res.status(200).send( { 
-	      message: 'Usuario creado correctamente',
-	    })
-	  })
-	}else{
-		res.status(500).send('No mandes request vacias');
-	}
-}
-*/
+
 
 // Funcion crear usuario modificada
 function createUser(req, res, next) {
