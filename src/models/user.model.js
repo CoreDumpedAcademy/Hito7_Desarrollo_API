@@ -2,7 +2,18 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 const Schema = mongoose.Schema;
 const enumerator = require('../middlewares/enumStructures');
+const newsStructures = require('../middlewares/newsStructures');
 
+var keyWordCounter = new Schema({
+		name:{type:String, required:true},
+		counter:{type:Number, default:1},
+		categoryUsed:{type:String, default:'none'},
+});
+const categoryModel = new Schema({
+	categoryName:String,
+	views:Number,
+
+});
 const userSchema = new Schema({
 	userName: { type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
 	firstName: { type: String, required: true, maxlength: 50 },
@@ -19,8 +30,20 @@ const userSchema = new Schema({
 	signUp: { type: Date, default: Date.now() },
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
+		mostUsedKeyWords: {type: [keyWordCounter], required:false},
+		categoryViews: {type:[categoryModel], required:false}
+/*		categoryViews:{
+			business:{type:Number, default:0},
+			science:{type:Number, default:0},
+			health:{type:Number, default:0},
+			entertaiment:{type:Number, default:0},
+			general:{type:Number, default:0},
+			technology:{type:Number, default:0},
+			sports:{type:Number, default:0},
+			*/
+		}
+
 		// TODO->AÑADIR MÁS ESTADISTICAS
-	}
 });
 
 userSchema.pre('save', function (next) {
@@ -41,7 +64,6 @@ userSchema.pre('save', function (next) {
 		})
 	})
 });
-
 userSchema.methods.comparePassword = function (password, cb) {
 	bcrypt.compare(password, this.password, (err, equals) => {
 		if (err) {
@@ -50,7 +72,13 @@ userSchema.methods.comparePassword = function (password, cb) {
 		cb(null, equals);
 	})
 }
-
+/*
+userSchema.methods.addCategory = function(category){
+	this.statistics.categoryViews[category]++;
+//	console.log(this.categoryViews[0]);
+	console.log(enumerator.categoriesArray[category] + ': ' + this.statistics.categoryViews[category]);
+}
+*/
 module.exports = mongoose.model(
 	enumerator.modelsName.user,
 	userSchema

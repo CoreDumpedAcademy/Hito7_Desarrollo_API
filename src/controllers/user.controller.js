@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 const service = require('../service');
+const newsStrc = require('../middlewares/newsStructures');
 /*
 //Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
 async function logUser(req, res) {
@@ -46,7 +47,7 @@ function logUser(req, res) {
         token: service.createToken(user)
       })
     } else {
-      res.status(200).send({
+      res.status(500).send({
         message: 'Contraseña incorrecta',
       })
     }
@@ -269,7 +270,35 @@ function deleteUser(req, res) {
     });
   });
 }
-
+function getCategories(req, res){
+	User.findOne({email:req.body.email}, (err, user)=>{
+		if(err){ 
+			res.status(500).send(`Error: ${err}`);
+			return next(err)
+		}
+		return res.status(200).send(user.categoryViews);
+	});
+}
+function addCategory(req, res){
+	const category = req.body.category;
+	let categories;
+	let founded = false;
+	User.findOne({email:req.body.email},(err,user) =>{
+			categories = user.categoryViews;
+		});
+	categories.find((element) => {
+		if(element.categoryName == category){
+			element.views++;
+			founded = true;
+		}
+	});
+	if(!founded && newsStrc.find(category)){
+		
+	}
+	User.findOneAndUpdate({email: req.body.email}, {$set:{categoryViews:categories}}, err => {
+			if(err) return next(err);
+	});
+}
 module.exports = {
   createUser,
   getUser,
@@ -280,5 +309,7 @@ module.exports = {
   getInactiveUsers,
   activate,
   deactivate,
-  logUser
+  logUser,
+  addCategory,
+  getCategories,
 };

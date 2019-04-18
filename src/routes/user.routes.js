@@ -23,4 +23,7 @@ api.delete('/user/:userId', userController.deleteUser);
 api.put('/user/activate/:username', userController.activate) // ACTIVAR USUARIO (SI ESTÁ INACTIVO)
 api.put('/user/deactivate/:username', userController.deactivate) // DESACTIVAR USUARIO (SI ESTÁ ACTIVO)
 
+api.post('/user/addCategory', userController.addCategory) //+1 A LA CATEGORÍA VISITDADA
+api.post('/user/categoriesViews', userController.getCategories);
+
 module.exports = api;
