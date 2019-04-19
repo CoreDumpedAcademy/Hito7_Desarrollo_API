@@ -8,7 +8,8 @@ const userController = require('../controllers/user.controller')
 api.post('/user', userController.createUser);
 api.post('/logUser', userController.logUser);
 api.get('/userid/:userId', userController.getUser);
-api.get('/username/:username', userController.getByUsername)
+api.get('/username/:username', userController.getByUsername);
+api.get('/email/:email', userController.getByEmail);
 api.get('/user/private', auth, (req, res) => {
     res.status(200).send({ message: 'Tienes Acceso' })
 })

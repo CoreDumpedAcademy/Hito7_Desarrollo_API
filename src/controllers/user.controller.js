@@ -172,9 +172,9 @@ function getInactiveUsers(req, res) {
 }
 
 function getUser(req, res) {
-  let userId = req.params.userId;
+  let mail = req.params.email;
 
-  User.findById(userId, (err, user) => {
+  User.findOne({email:mail}, (err, user) => {
     if (err)
       return res
         .status(500)
@@ -269,6 +269,14 @@ function getByUsername(req, res){
     return res.status(200).send({user})
   })
 }
+function getByEmail(req, res){
+	const reqEmail = req.params.email;
+	User.findOne({email:reqEmail}, (err, user) =>{
+		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
+		if(!user) return res.status(404).send({message: 'Usuario no encontrado'});
+		return res.status(200).send({user})
+	});
+}
 
 module.exports = {
   createUser,
@@ -283,5 +291,6 @@ module.exports = {
   logUser,
   addFavNew,
   getByUsername,
-  deleteFavArt
+  getByEmail, 
+  deleteFavArt,
 };
