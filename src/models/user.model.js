@@ -9,11 +9,30 @@ var keyWordCounter = new Schema({
 		counter:{type:Number, default:1},
 		categoryUsed:{type:String, default:'none'},
 });
-const categoryModel = new Schema({
-	categoryName:String,
-	views:Number,
+/*
+var categorySchema = new Schema({
+	categoryName:{type:String, default:''},
+	views:{type:Number, default:0},
 
-});
+});*/
+var categorySchema = {
+	categoryName:'',
+	views:0,
+}
+var categorySchemaArray = [
+	{
+		categoryName:'businnes',
+		views:0,
+	},
+	{
+		categoryName:'science',
+		views:0,
+	},
+	{
+		categoryName:'entertaiment',
+		views:0,
+	}
+];
 const userSchema = new Schema({
 	userName: { type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
 	firstName: { type: String, required: true, maxlength: 50 },
@@ -31,7 +50,7 @@ const userSchema = new Schema({
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
 		mostUsedKeyWords: {type: [keyWordCounter], required:false},
-		categoryViews: {type:[categoryModel], required:false}
+		categoryViews: {type:[categorySchema], required:false, default:categorySchemaArray}
 /*		categoryViews:{
 			business:{type:Number, default:0},
 			science:{type:Number, default:0},
@@ -72,6 +91,28 @@ userSchema.methods.comparePassword = function (password, cb) {
 		cb(null, equals);
 	})
 }
+userSchema.methods.addViewCategory = function(category){
+	let exist = false;
+	this.statistics.categoryViews.find(element =>{
+		if(element.categoryName == category){
+			element.views++;
+			exist = true;
+			console.log('El elemento existe: ' + element);
+		}
+	});
+		if(!exist){
+			/*
+			let newCategory = {
+				categoryName:category,
+				views: 1,
+			}*/
+			let newCategory = categorySchema;
+			newCategory.categoryName = category;
+			newCategory.views = 1;
+			this.statistics.categoryViews.push(newCategory);
+			console.log('model: ' + this.statistics.categoryViews);
+		}
+}
 /*
 userSchema.methods.addCategory = function(category){
 	this.statistics.categoryViews[category]++;
@@ -81,5 +122,5 @@ userSchema.methods.addCategory = function(category){
 */
 module.exports = mongoose.model(
 	enumerator.modelsName.user,
-	userSchema
+	userSchema,
 );

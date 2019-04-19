@@ -279,8 +279,42 @@ function getCategories(req, res){
 		return res.status(200).send(user.categoryViews);
 	});
 }
-function addCategory(req, res){
-	const category = req.body.category;
+function addCategory(req, res, next){
+	const reqCategory = req.body.category;
+	const reqEmail = req.body.email;
+	let categories;
+	let categorySchema;
+	User.findOne({email:reqEmail}, (err, user) =>{
+		if(err){ 
+			res.status(500).send('HA OCURRIDO UN ERROR'); 
+			return next(err);
+		}
+		if(user){
+			//console.log('controller before: ' + user.statistics.categoryViews);
+			//user.addViewCategory(reqCategory);
+			//console.log('Controller: ' + user.statistics.categoryViews);
+			categories = user.statistics.cartegoryViews;
+			res.status(200).send('ok');
+		}else{
+			console.log('User no encontrado');
+			res.status(500).send("no user");
+		}
+	});
+		categories.find(element =>{
+			if(element.categoryName == reqCategory){
+				element.views++;
+			}else if(newsStrc.arrayCategories.include(reqCategory)){
+				categorySchema = {
+					categoryName:category,
+					views:1,
+					}
+				categories.push(categorySchema);
+			}
+			console.log(categories);
+			});
+}
+	}
+	/*const category = req.body.category;
 	let categories;
 	let founded = false;
 	User.findOne({email:req.body.email},(err,user) =>{
@@ -297,8 +331,8 @@ function addCategory(req, res){
 	}
 	User.findOneAndUpdate({email: req.body.email}, {$set:{categoryViews:categories}}, err => {
 			if(err) return next(err);
-	});
-}
+	});*/
+
 module.exports = {
   createUser,
   getUser,
