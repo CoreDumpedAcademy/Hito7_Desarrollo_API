@@ -27,4 +27,8 @@ api.put('/user/deactivate/:username',userController.deactivate) // DESACTIVAR US
 api.put('/favNews/:user',userController.addFavNew) // AÑADIR UNA NOTICIA AL USUARIO :user
 api.put('/favNews/:user/:index', userController.deleteFavArt) // ELIMINA LA NOTICIA FAVORITA DE LA POSICIÓN INDEX DEL USUARIO USER
 
+api.put('/user/lang/:userId/:lang',userController.updateLangFav) //Actualizar idioma favorito
+api.put('/user/country/:userId/:country',userController.updateCountryFav) //Actualizar pais favorito
+api.get('/user/lang/:userId',userController.getLangFav) //Obtener idioma favorito
+//api.get('/user/country/:userId',userController.getCountryFav) //Actualizar pais favorito
 module.exports = api;

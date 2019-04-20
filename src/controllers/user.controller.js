@@ -193,7 +193,9 @@ function getUser(req, res) {
 async function updateUser(req, res) {
   let userID = req.params.userId
   let update = req.body
-  update.password = await helpers.encriptarPassword(req.body.password);
+  let password = req.body.password
+
+  if(password!=undefined) update.password = await helpers.encriptarPassword(req.body.password);
 
   User.findByIdAndUpdate(userID, update, (err, oldUser) => {
     if (err) res.status(500).send({
@@ -205,6 +207,7 @@ async function updateUser(req, res) {
     })
   })
 }
+
 
 function deleteUser(req, res) {
   let userId = req.params.userId;
@@ -232,6 +235,86 @@ function deleteUser(req, res) {
     });
   });
 }
+
+
+/**
+ * @param {*} req 
+ * @param {*} res
+ * update the language preferences 
+ */
+function updateLangFav(req,res){
+  var lang = req.params.lang
+  var userID = req.params.userId
+
+  User.findByIdAndUpdate(userID, {$set: {'preferences.favLanguage':lang}}, (err, oldUser) => {
+    if (err) res.status(500).send({
+      message: `Error al actualizar el lenguaje: ${err}`
+    })
+
+    res.status(200).send({
+      user: oldUser
+    })
+  })
+}
+
+/**
+ * @param {*} req 
+ * @param {*} res 
+ * update the country preference
+ */
+function updateCountryFav(req,res){
+  var country = req.params.country
+  var userID = req.params.userId
+
+  User.findByIdAndUpdate(userID, {$set: {'preferences.favCountry':country}}, (err, oldUser) => {
+    if (err) res.status(500).send({
+      message: `Error al actualizar el pais: ${err}`
+    })
+
+    res.status(200).send({
+      user: oldUser
+    })
+  })
+}
+
+function getLangFav(req,res){
+  let userId = req.params.userId;
+
+  User.findById(userId, 'preferences.favLanguage -_id', (err, user) => {
+    if (err)
+      return res
+        .status(500)
+        .send({
+          message: `Error al realizar peticion: ${err}`
+        });
+    if (!user) return res.status(404).send({
+      message: `El usuario no existe`
+    });
+    res.status(200).send({
+      user
+    });
+  });
+}
+
+function getCountryFav(req,res){
+  let userId = req.params.userId;
+
+  User.findById(userId, 'preferences.favCountry -_id', (err, user) => {
+    if (err)
+      return res
+        .status(500)
+        .send({
+          message: `Error al realizar peticion: ${err}`
+        });
+    if (!user) return res.status(404).send({
+      message: `El usuario no existe`
+    });
+    res.status(200).send({
+      user
+    });
+  });
+}
+
 
 // ESTA FUNCION RECIBE UN USUARIO POR PARAMETRO Y UNA NOTICIA EN EL BODY DE LA PETICIÓN. GUARDA LA NOTICIA EN EL ARRAY DE NOTICIAS FAVORITAS DEL USUARIO
 function addFavNew(req, res){
@@ -283,5 +366,9 @@ module.exports = {
   logUser,
   addFavNew,
   getByUsername,
-  deleteFavArt
+  deleteFavArt,
+  updateLangFav,
+  updateCountryFav,
+  getLangFav,
+  getCountryFav
 };
