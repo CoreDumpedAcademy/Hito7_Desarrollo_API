@@ -11,7 +11,7 @@ api.get('/userid/:userId', userController.getUser);
 api.get('/username/:username', userController.getByUsername);
 api.get('/email/:email', userController.getByEmail);
 api.get('/user/private', auth, (req, res) => {
-    res.status(200).send({ message: 'Tienes Acceso' })
+    res.status(200).send({ logged: true })
 })
 
 // GET DE VARIOS USUARIOS
