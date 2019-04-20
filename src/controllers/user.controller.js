@@ -313,7 +313,7 @@ function addCategory(req, res, next){
 			console.log(categories);
 			});
 }
-	}
+	
 	/*const category = req.body.category;
 	let categories;
 	let founded = false;
