@@ -172,9 +172,9 @@ function getInactiveUsers(req, res) {
 }
 
 function getUser(req, res) {
-  let userId = req.params.userId;
+  let mail = req.params.email;
 
-  User.findById(userId, (err, user) => {
+  User.findOne({email:mail}, (err, user) => {
     if (err)
       return res
         .status(500)
@@ -193,11 +193,13 @@ function getUser(req, res) {
 async function updateUser(req, res) {
   let userID = req.params.userId
   let update = req.body
-  let password = req.body.password
-
-  if(password!=undefined) update.password = await helpers.encriptarPassword(req.body.password);
-
-  User.findByIdAndUpdate(userID, update, (err, oldUser) => {
+  console.log("EDITING USER "+ req.params.userId)
+  if(req.body.password != undefined&&req.body.password != ""){
+    console.log("PASSWORD DID CHANGE")  // SI NO SE METE CONTRASEÑA EN LA ACTUALIZACIÓN, NO HAY QUE CAMBIARLA
+    update.password = await helpers.encriptarPassword(req.body.password);
+  } else console.log("PASSWORD DID NOT CHANGE")
+  console.log(update)
+  User.findOneAndUpdate({email:userID}, update, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el usuario: ${err}`
     })
@@ -352,6 +354,29 @@ function getByUsername(req, res){
     return res.status(200).send({user})
   })
 }
+function getByEmail(req, res){
+  console.log("GET by EMAIL "+req.params.email)
+	const reqEmail = req.params.email;
+	User.findOne({email:reqEmail}, (err, user) =>{
+		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
+		if(!user) return res.status(404).send({message: 'Usuario no encontrado'});
+		return res.status(200).send({user})
+  });
+  }
+  
+  function checkPassword(req, res){
+    var logged = false
+    User.findOne({email: req.body.email}, async (err, user) => {
+      if (err) return res.status(500).send({ message: err })
+      if (!user) return res.status(404).send({message: 'No existe el usuario,'})
+
+      req.user = user
+      logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+
+      if (logged) res.status(200).send({message: 'Contraseña correcta'})
+      else res.status(403).send({message: 'Contraseña incorrecta'})
+    })
+  }
 
 module.exports = {
   createUser,
@@ -370,5 +395,8 @@ module.exports = {
   updateLangFav,
   updateCountryFav,
   getLangFav,
-  getCountryFav
+  getCountryFav,
+  getByEmail, 
+  deleteFavArt,
+  checkPassword
 };

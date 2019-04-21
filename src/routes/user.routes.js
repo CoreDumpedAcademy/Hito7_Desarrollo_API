@@ -8,9 +8,10 @@ const userController = require('../controllers/user.controller')
 api.post('/user', userController.createUser);
 api.post('/logUser', userController.logUser);
 api.get('/userid/:userId', userController.getUser);
-api.get('/username/:username', userController.getByUsername)
+api.get('/username/:username', userController.getByUsername);
+api.get('/email/:email', userController.getByEmail);
 api.get('/user/private', auth, (req, res) => {
-    res.status(200).send({ message: 'Tienes Acceso' })
+    res.status(200).send({ logged: true })
 })
 
 // GET DE VARIOS USUARIOS
@@ -31,4 +32,7 @@ api.put('/user/lang/:userId/:lang',userController.updateLangFav) //Actualizar id
 api.put('/user/country/:userId/:country',userController.updateCountryFav) //Actualizar pais favorito
 api.get('/user/lang/:userId',userController.getLangFav) //Obtener idioma favorito
 api.get('/user/country/:userId',userController.getCountryFav) //Obtener pais favorito
+
+api.post('/checkpwd', userController.checkPassword) // COMO EL LOGIN, PERO NO GENERA TOKEN
+
 module.exports = api;
