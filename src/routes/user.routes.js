@@ -28,4 +28,7 @@ api.put('/user/deactivate/:username',userController.deactivate) // DESACTIVAR US
 api.put('/favNews/:user',userController.addFavNew) // AÑADIR UNA NOTICIA AL USUARIO :user
 api.put('/favNews/:user/:index', userController.deleteFavArt) // ELIMINA LA NOTICIA FAVORITA DE LA POSICIÓN INDEX DEL USUARIO USER
 
+api.post('/user/addCategory', userController.addCategory) //+1 A LA CATEGORÍA VISITDADA
+api.post('/user/categoriesViews', userController.getCategories);
+
 module.exports = api;

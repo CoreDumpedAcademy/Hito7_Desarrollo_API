@@ -2,7 +2,25 @@ const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 const service = require('../service');
-
+const newsStrc = require('../middlewares/newsStructures');
+/*
+//Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
+async function logUser(req, res) {
+  const logUser = req.body;
+  let logueado = false;
+  User.findOne({ email: logUser.email }, async function (err, user) {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` });
+    console.log(user);
+    if (!user) return res.status(404).send({ message: "El usuario no existe" });
+    logueado = await helpers.compararPassword(logUser.password.toString(), user.password.toString());
+    if (logueado) {
+      return res.status(200).send({ message: "Te has logueado correctamente" });
+    } else {
+      return res.status(404).send({ message: "Usuario o contraseña incorrectos" });
+    }
+  });
+}
+*/
 
 // Funcion logUser Modificado
 function logUser(req, res) {
@@ -28,7 +46,7 @@ function logUser(req, res) {
         token: service.createToken(user)
       })
     } else {
-      res.status(403).send({
+      res.status(500).send({
         message: 'Contraseña incorrecta',
       })
     }
@@ -57,11 +75,10 @@ function createUser(req, res, next) {
           }),
           next(err);
       }else{
-	
       return res.status(200).send({
         token: service.createToken(user)
       })
-		}
+	}
     })
   })
 }
@@ -234,6 +251,49 @@ function deleteUser(req, res) {
     });
   });
 }
+function getCategories(req, res){
+	User.findOne({email:req.body.email}, (err, user)=>{
+		if(err){ 
+			res.status(500).send(`Error: ${err}`);
+			return next(err)
+		}else{ 
+		return res.status(200).send(user.statistics.categoryViews);
+		}
+	});
+}
+//Funcion que saca el array categoryViews, lo actualiza y lo vuelve a guardar.
+//Sería mas eficiente hacerlo desde el modelo, por el hecho de no tener que sacarlo y luego meterlo pero no lo consigo hacer.
+async function  addCategory(req, res, next){
+	try{
+		const reqCategory = req.body.category;
+		const reqEmail = req.body.email;
+		let categories =  [];
+		let categorySchema;
+		if(reqCateogory != null && reqEmail != null){
+			await User.findOne({email:reqEmail}, (err, user) =>{
+				if(err){ 
+					res.status(500).send('HA OCURRIDO UN ERROR'); 
+					return next(err);
+				}
+				if(user){
+					categories = user.statistics.categoryViews;
+				}else{
+					console.log('User no encontrado');
+					res.status(500).send("no user");
+				}
+			});
+			categories.forEach((element) => {
+				if(element.categoryName == reqCategory)element.views = element.views + 1;
+			});
+			User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{categoryViews:categories}}}, (err, user) =>{
+				if(err) return res.status(500).send("Error: " + err);
+				res.status(200).send('ok');
+			});
+		}
+	}catch(e){
+		console.log(e);
+	}
+}
 
 // ESTA FUNCION RECIBE UN USUARIO POR PARAMETRO Y UNA NOTICIA EN EL BODY DE LA PETICIÓN. GUARDA LA NOTICIA EN EL ARRAY DE NOTICIAS FAVORITAS DEL USUARIO
 function addFavNew(req, res){
@@ -291,8 +351,13 @@ module.exports = {
   activate,
   deactivate,
   logUser,
+<<<<<<< HEAD
   addFavNew,
   getByUsername,
   getByEmail, 
   deleteFavArt,
+=======
+  addCategory,
+  getCategories,
+>>>>>>> recomendacionNoticias
 };

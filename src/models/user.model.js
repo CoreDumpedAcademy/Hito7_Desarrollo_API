@@ -12,7 +12,54 @@ const NewsSchema = new Schema({
 	publishedAt: {type: Date},
 	content: {type: String}
 })
+const newsStructures = require('../middlewares/newsStructures');
+mongoose.set('useCreateIndex', true);
+var keyWordCounter = new Schema({
+		name:{type:String, required:true},
+		counter:{type:Number, default:1},
+		categoryUsed:{type:String, default:'none'},
+		lastView:{type:Date, default:Date.now()},
+});
 
+var categorySchema = new Schema({
+	categoryName:{type:String, default:''},
+	views:{type:Number, default:0},
+});
+/*
+var categorySchema = {
+	categoryName:'',
+	views:0,
+}*/
+var categorySchemaArray = [
+	{
+		categoryName:'business',
+		views:0,
+	},
+	{
+		categoryName:'science',
+		views:0,
+	},
+	{
+		categoryName:'entertaiment',
+		views:0,
+	},
+	{
+		categoryName:'health',
+		views:0,
+	}, 
+	{
+		categoryName:'sports',
+		views:0,
+	},
+	{
+		categoryName:'general', 
+		views:0
+	},
+	{
+		categoryName: 'technology',
+		views:0,
+	}
+];
 const userSchema = new Schema({
 	userName: { type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
 	firstName: { type: String, required: true, maxlength: 50 },
@@ -30,7 +77,10 @@ const userSchema = new Schema({
 	signUp: { type: Date, default: Date.now() },
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
+		mostUsedKeyWords: {type: [keyWordCounter], required:false},
+		categoryViews: {type:[categorySchema], required:false, default:categorySchemaArray},
 		// TODO->AÑADIR MÁS ESTADISTICAS
+<<<<<<< HEAD
 	},
 	media: {
 		banner:{
@@ -46,6 +96,9 @@ const userSchema = new Schema({
 		favLanguage: { type: String, default: enumeratorNews.languagesArray[2] }, //en
 		favCountry: { type: String, default: enumeratorNews.countriesArray[50] } //usa
 	}
+=======
+		},
+>>>>>>> recomendacionNoticias
 });
 
 userSchema.pre('save', function (next) {
@@ -66,7 +119,6 @@ userSchema.pre('save', function (next) {
 		})
 	})
 });
-
 userSchema.methods.comparePassword = function (password, cb) {
 	bcrypt.compare(password, this.password, (err, equals) => {
 		if (err) {
@@ -75,8 +127,7 @@ userSchema.methods.comparePassword = function (password, cb) {
 		cb(null, equals);
 	})
 }
-
 module.exports = mongoose.model(
 	enumerator.modelsName.user,
-	userSchema
+	userSchema,
 );
