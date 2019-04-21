@@ -66,47 +66,27 @@ function createUser(req, res, next) {
 
 
 // LAS DOS FUNCIONES SIGUIENTES SIRVEN PARA ACTIVAR O DESACTIVAR EL USUARIO (BORRADO LÓGICO)
-// PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL NOMBRE DE USUARIO AL QUE ACTIVAR - DESACTIVAR
+// PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL EMAIL DE USUARIO AL QUE ACTIVAR - DESACTIVAR
 function deactivate(req, res) {
-  var username = req.params.username
-  User.findOne({
-    userName: username
-  }, (err, updated) => {
-    if (err) return res.status(500).send({
-      message: `Error al desactivar el usuario ${err}`
-    })
-    if (!updated) return res.status(404).send({
-      message: 'Error 404'
-    })
+  var email = req.params.username
+  User.findOne({email: email}, (err, updated) => {
+    if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if (!updated) return res.status(404).send({message: 'Error 404'})
     updated.isActive = false
-    User.findOneAndUpdate({
-      userName: username
-    }, updated, () => {
-      return res.status(200).send({
-        message: 'User deactivated correctly'
-      })
+    User.findOneAndUpdate({email: email}, updated, () => {
+      return res.status(200).send({message: 'User deactivated correctly'})
     })
   })
 }
 
 function activate(req, res) {
-  var username = req.params.username
-  User.findOne({
-    userName: username
-  }, (err, updated) => {
-    if (err) return res.status(500).send({
-      message: `Error al desactivar el usuario ${err}`
-    })
-    if (!updated) return res.status(404).send({
-      message: 'Error 404'
-    })
+  var email = req.params.username
+  User.findOne({email: email}, (err, updated) => {
+    if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if (!updated) return res.status(404).send({message: 'Error 404'})
     updated.isActive = true
-    User.findOneAndUpdate({
-      userName: username
-    }, updated, () => {
-      return res.status(200).send({
-        message: 'User deactivated correctly'
-      })
+    User.findOneAndUpdate({email:email}, updated, () => {
+      return res.status(200).send({message: 'User activated correctly'})
     })
   })
 }
