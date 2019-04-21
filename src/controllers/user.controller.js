@@ -56,10 +56,12 @@ function createUser(req, res, next) {
             message: 'Error al crear el usuario'
           }),
           next(err);
-      }
+      }else{
+	
       return res.status(200).send({
         token: service.createToken(user)
       })
+		}
     })
   })
 }
