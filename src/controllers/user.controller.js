@@ -193,7 +193,9 @@ function getUser(req, res) {
 async function updateUser(req, res) {
   let userID = req.params.userId
   let update = req.body
-  update.password = await helpers.encriptarPassword(req.body.password);
+  if(req.body.password != undefined){ // SI NO SE METE CONTRASEÑA EN LA ACTUALIZACIÓN, NO HAY QUE CAMBIARLA
+    update.password = await helpers.encriptarPassword(req.body.password);
+  }
 
   User.findOneAndUpdate({userName:userID}, update, (err, oldUser) => {
     if (err) res.status(500).send({
