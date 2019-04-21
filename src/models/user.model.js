@@ -80,7 +80,6 @@ const userSchema = new Schema({
 		mostUsedKeyWords: {type: [keyWordCounter], required:false},
 		categoryViews: {type:[categorySchema], required:false, default:categorySchemaArray},
 		// TODO->AÑADIR MÁS ESTADISTICAS
-<<<<<<< HEAD
 	},
 	media: {
 		banner:{
@@ -96,10 +95,7 @@ const userSchema = new Schema({
 		favLanguage: { type: String, default: enumeratorNews.languagesArray[2] }, //en
 		favCountry: { type: String, default: enumeratorNews.countriesArray[50] } //usa
 	}
-=======
-		},
->>>>>>> recomendacionNoticias
-});
+		});
 
 userSchema.pre('save', function (next) {
 	const user = this;
