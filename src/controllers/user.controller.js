@@ -192,7 +192,6 @@ function getInactiveUsers(req, res) {
 
 function getUser(req, res) {
   let mail = req.params.email;
-
   User.findOne({email:mail}, (err, user) => {
     if (err)
       return res
@@ -295,7 +294,44 @@ async function  addCategory(req, res, next){
 		console.log(e);
 	}
 }
-
+async function addKeyWord(req, res){
+	const kw = req.body.q;
+	const reqEmail = req.body.email;
+	let kwArray = [];
+	let finded = false;
+	if(reqEmail != null && kw != null){
+		await User.findOne({email:reqEmail}, (err, user) =>{
+			if(err) return res.status(500).send("ERROR: " + err);
+			if(user){
+				kwArray = user.statistics.mostUsedKeyWords;
+				console.log('Recibimos: ' + user.statistics.mostUsedKeyWords + ' Almacenamos: ' + kwArray);
+				res.status(200).send(kwArray);
+			}
+		});
+		console.log('oldKwArray: ' + kwArray);
+		if(kwArray != []){
+			kwArray.forEach((element) =>{
+				console.log(element);
+				if(element.name == kw){
+					element.counter = element.counter + 1;
+					element.lastView = Date.now();
+					finded = true;
+				}
+			});
+			if(!finded){
+				let newKw = {
+					name:kw,
+					counter:1,
+					lastView:Date.now(),
+				}
+				kwArray.push(newKw);
+			}
+		User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{mostUsedKeyWords:kwArray}}}, err =>{
+				if(err)console.log("Ya la has liao: " + err)
+		});
+		}
+	}
+}
 // ESTA FUNCION RECIBE UN USUARIO POR PARAMETRO Y UNA NOTICIA EN EL BODY DE LA PETICIÓN. GUARDA LA NOTICIA EN EL ARRAY DE NOTICIAS FAVORITAS DEL USUARIO
 function addFavNew(req, res){
   var noticia = req.body
@@ -358,4 +394,5 @@ module.exports = {
   deleteFavArt,
   addCategory,
   getCategories,
+  addKeyWord,
 };

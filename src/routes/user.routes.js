@@ -29,6 +29,8 @@ api.put('/favNews/:user',userController.addFavNew) // AÑADIR UNA NOTICIA AL USU
 api.put('/favNews/:user/:index', userController.deleteFavArt) // ELIMINA LA NOTICIA FAVORITA DE LA POSICIÓN INDEX DEL USUARIO USER
 
 api.post('/user/addCategory', userController.addCategory) //+1 A LA CATEGORÍA VISITDADA
-api.post('/user/categoriesViews', userController.getCategories);
+api.post('/user/categoriesViews', userController.getCategories);//DEVUELVE TODAS LAS CATEGORIAS Y SUS RESPECTIVAS VISITAS.
+
+api.post('/user/addKeyWord', userController.addKeyWord);//+1 A LA KEYWORD MANDADA.
 
 module.exports = api;

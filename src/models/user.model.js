@@ -15,9 +15,8 @@ const NewsSchema = new Schema({
 const newsStructures = require('../middlewares/newsStructures');
 mongoose.set('useCreateIndex', true);
 var keyWordCounter = new Schema({
-		name:{type:String, required:true},
+		name:{type:String, default:''},
 		counter:{type:Number, default:1},
-		categoryUsed:{type:String, default:'none'},
 		lastView:{type:Date, default:Date.now()},
 });
 
@@ -30,6 +29,13 @@ var categorySchema = {
 	categoryName:'',
 	views:0,
 }*/
+var keyWordSchemaArray = [
+	{
+		name:'FirstKw',
+		count:1,
+		lastView:Date.now(),
+	},
+]
 var categorySchemaArray = [
 	{
 		categoryName:'business',
@@ -77,7 +83,7 @@ const userSchema = new Schema({
 	signUp: { type: Date, default: Date.now() },
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
-		mostUsedKeyWords: {type: [keyWordCounter], required:false},
+		mostUsedKeyWords: {type:[keyWordCounter], required:false, default:keyWordSchemaArray},
 		categoryViews: {type:[categorySchema], required:false, default:categorySchemaArray},
 		// TODO->AÑADIR MÁS ESTADISTICAS
 	},
