@@ -193,11 +193,14 @@ function getUser(req, res) {
 async function updateUser(req, res) {
   let userID = req.params.userId
   let update = req.body
-  if(req.body.password != undefined){ // SI NO SE METE CONTRASEÑA EN LA ACTUALIZACIÓN, NO HAY QUE CAMBIARLA
+  console.log("EDITING USER "+ req.params.userId)
+  if(req.body.password != undefined&&req.body.password != ""){
+    console.log("PASSWORD DID CHANGE")  // SI NO SE METE CONTRASEÑA EN LA ACTUALIZACIÓN, NO HAY QUE CAMBIARLA
     update.password = await helpers.encriptarPassword(req.body.password);
-  }
+  } else console.log("PASSWORD DID NOT CHANGE")
+  console.log(update)
 
-  User.findOneAndUpdate({userName:userID}, update, (err, oldUser) => {
+  User.findOneAndUpdate({email:userID}, update, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el usuario: ${err}`
     })
