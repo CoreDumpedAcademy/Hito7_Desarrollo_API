@@ -195,7 +195,7 @@ async function updateUser(req, res) {
   let update = req.body
   update.password = await helpers.encriptarPassword(req.body.password);
 
-  User.findByIdAndUpdate(userID, update, (err, oldUser) => {
+  User.findOneAndUpdate({userName:userID}, update, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el usuario: ${err}`
     })
@@ -270,6 +270,7 @@ function getByUsername(req, res){
   })
 }
 function getByEmail(req, res){
+  console.log("GET by EMAIL "+req.params.email)
 	const reqEmail = req.params.email;
 	User.findOne({email:reqEmail}, (err, user) =>{
 		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
