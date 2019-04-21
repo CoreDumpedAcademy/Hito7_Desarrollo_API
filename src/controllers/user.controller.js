@@ -94,10 +94,11 @@ function createUser(req, res, next) {
             message: 'Error al crear el usuario'
           }),
           next(err);
-      }
+      }else{
       return res.status(200).send({
         token: service.createToken(user)
       })
+	}
     })
   })
 }
@@ -275,63 +276,44 @@ function getCategories(req, res){
 		if(err){ 
 			res.status(500).send(`Error: ${err}`);
 			return next(err)
+		}else{ 
+		return res.status(200).send(user.statistics.categoryViews);
 		}
-		return res.status(200).send(user.categoryViews);
 	});
 }
-function addCategory(req, res, next){
-	const reqCategory = req.body.category;
-	const reqEmail = req.body.email;
-	let categories;
-	let categorySchema;
-	User.findOne({email:reqEmail}, (err, user) =>{
-		if(err){ 
-			res.status(500).send('HA OCURRIDO UN ERROR'); 
-			return next(err);
-		}
-		if(user){
-			//console.log('controller before: ' + user.statistics.categoryViews);
-			//user.addViewCategory(reqCategory);
-			//console.log('Controller: ' + user.statistics.categoryViews);
-			categories = user.statistics.cartegoryViews;
-			res.status(200).send('ok');
-		}else{
-			console.log('User no encontrado');
-			res.status(500).send("no user");
-		}
-	});
-		categories.find(element =>{
-			if(element.categoryName == reqCategory){
-				element.views++;
-			}else if(newsStrc.arrayCategories.include(reqCategory)){
-				categorySchema = {
-					categoryName:category,
-					views:1,
-					}
-				categories.push(categorySchema);
-			}
-			console.log(categories);
+//Funcion que saca el array categoryViews, lo actualiza y lo vuelve a guardar.
+//Sería mas eficiente hacerlo desde el modelo, por el hecho de no tener que sacarlo y luego meterlo pero no lo consigo hacer.
+async function  addCategory(req, res, next){
+	try{
+		const reqCategory = req.body.category;
+		const reqEmail = req.body.email;
+		let categories =  [];
+		let categorySchema;
+		if(reqCateogory != null && reqEmail != null){
+			await User.findOne({email:reqEmail}, (err, user) =>{
+				if(err){ 
+					res.status(500).send('HA OCURRIDO UN ERROR'); 
+					return next(err);
+				}
+				if(user){
+					categories = user.statistics.categoryViews;
+				}else{
+					console.log('User no encontrado');
+					res.status(500).send("no user");
+				}
 			});
-}
-	
-	/*const category = req.body.category;
-	let categories;
-	let founded = false;
-	User.findOne({email:req.body.email},(err,user) =>{
-			categories = user.categoryViews;
-		});
-	categories.find((element) => {
-		if(element.categoryName == category){
-			element.views++;
-			founded = true;
+			categories.forEach((element) => {
+				if(element.categoryName == reqCategory)element.views = element.views + 1;
+			});
+			User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{categoryViews:categories}}}, (err, user) =>{
+				if(err) return res.status(500).send("Error: " + err);
+				res.status(200).send('ok');
+			});
 		}
-	});
-	if(!founded && newsStrc.find(category)){
-		
+	}catch(e){
+		console.log(e);
 	}
-	User.findOneAndUpdate({email: req.body.email}, {$set:{categoryViews:categories}}, err => {
-			if(err) return next(err);
-	});*/
+}
 
 module.exports = {
   createUser,

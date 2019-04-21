@@ -3,25 +3,27 @@ const bcrypt = require('bcrypt-nodejs');
 const Schema = mongoose.Schema;
 const enumerator = require('../middlewares/enumStructures');
 const newsStructures = require('../middlewares/newsStructures');
-
+mongoose.set('useCreateIndex', true);
 var keyWordCounter = new Schema({
 		name:{type:String, required:true},
 		counter:{type:Number, default:1},
 		categoryUsed:{type:String, default:'none'},
+		lastView:{type:Date, default:Date.now()},
 });
-/*
+
 var categorySchema = new Schema({
 	categoryName:{type:String, default:''},
 	views:{type:Number, default:0},
 
-});*/
+});
+/*
 var categorySchema = {
 	categoryName:'',
 	views:0,
-}
+}*/
 var categorySchemaArray = [
 	{
-		categoryName:'businnes',
+		categoryName:'business',
 		views:0,
 	},
 	{
@@ -30,6 +32,22 @@ var categorySchemaArray = [
 	},
 	{
 		categoryName:'entertaiment',
+		views:0,
+	},
+	{
+		categoryName:'health',
+		views:0,
+	}, 
+	{
+		categoryName:'sports',
+		views:0,
+	},
+	{
+		categoryName:'general', 
+		views:0
+	},
+	{
+		categoryName: 'technology',
 		views:0,
 	}
 ];
@@ -50,19 +68,9 @@ const userSchema = new Schema({
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
 		mostUsedKeyWords: {type: [keyWordCounter], required:false},
-		categoryViews: {type:[categorySchema], required:false, default:categorySchemaArray}
-/*		categoryViews:{
-			business:{type:Number, default:0},
-			science:{type:Number, default:0},
-			health:{type:Number, default:0},
-			entertaiment:{type:Number, default:0},
-			general:{type:Number, default:0},
-			technology:{type:Number, default:0},
-			sports:{type:Number, default:0},
-			*/
-		}
-
+		categoryViews: {type:[categorySchema], required:false, default:categorySchemaArray},
 		// TODO->AÑADIR MÁS ESTADISTICAS
+		},
 });
 
 userSchema.pre('save', function (next) {
@@ -91,35 +99,6 @@ userSchema.methods.comparePassword = function (password, cb) {
 		cb(null, equals);
 	})
 }
-userSchema.methods.addViewCategory = function(category){
-	let exist = false;
-	this.statistics.categoryViews.find(element =>{
-		if(element.categoryName == category){
-			element.views++;
-			exist = true;
-			console.log('El elemento existe: ' + element);
-		}
-	});
-		if(!exist){
-			/*
-			let newCategory = {
-				categoryName:category,
-				views: 1,
-			}*/
-			let newCategory = categorySchema;
-			newCategory.categoryName = category;
-			newCategory.views = 1;
-			this.statistics.categoryViews.push(newCategory);
-			console.log('model: ' + this.statistics.categoryViews);
-		}
-}
-/*
-userSchema.methods.addCategory = function(category){
-	this.statistics.categoryViews[category]++;
-//	console.log(this.categoryViews[0]);
-	console.log(enumerator.categoriesArray[category] + ': ' + this.statistics.categoryViews[category]);
-}
-*/
 module.exports = mongoose.model(
 	enumerator.modelsName.user,
 	userSchema,
