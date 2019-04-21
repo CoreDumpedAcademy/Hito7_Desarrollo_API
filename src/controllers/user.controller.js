@@ -278,8 +278,22 @@ function getByEmail(req, res){
 		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
 		if(!user) return res.status(404).send({message: 'Usuario no encontrado'});
 		return res.status(200).send({user})
-	});
-}
+  });
+  }
+  
+  function checkPassword(req, res){
+    var logged = false
+    User.findOne({email: req.body.email}, async (err, user) => {
+      if (err) return res.status(500).send({ message: err })
+      if (!user) return res.status(404).send({message: 'No existe el usuario,'})
+
+      req.user = user
+      logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+
+      if (logged) res.status(200).send({message: 'Contraseña correcta'})
+      else res.status(403).send({message: 'Contraseña incorrecta'})
+    })
+  }
 
 module.exports = {
   createUser,
@@ -296,4 +310,5 @@ module.exports = {
   getByUsername,
   getByEmail, 
   deleteFavArt,
+  checkPassword
 };
