@@ -30,5 +30,5 @@ api.put('/favNews/:user/:index', userController.deleteFavArt) // ELIMINA LA NOTI
 api.put('/user/lang/:userId/:lang',userController.updateLangFav) //Actualizar idioma favorito
 api.put('/user/country/:userId/:country',userController.updateCountryFav) //Actualizar pais favorito
 api.get('/user/lang/:userId',userController.getLangFav) //Obtener idioma favorito
-//api.get('/user/country/:userId',userController.getCountryFav) //Actualizar pais favorito
+api.get('/user/country/:userId',userController.getCountryFav) //Obtener pais favorito
 module.exports = api;
