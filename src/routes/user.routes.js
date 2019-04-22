@@ -37,6 +37,8 @@ api.post('/user/newSearch', userController.newSearch);//almacena la hora cada ve
 api.post('/user/newRead', userController.newRead);//almacena la hora cada vez que se lee
 api.post('/user/newLogin', userController.newLogin);//almacena la hora cada vez que se hace login
 
+api.post('/user/addCountry', userController.addCountry);//almacena la el pais desde el cual se hace la noticia
+
 api.put('/user/lang/:userId/:lang',userController.updateLangFav) //Actualizar idioma favorito
 api.put('/user/country/:userId/:country',userController.updateCountryFav) //Actualizar pais favorito
 api.get('/user/lang/:userId',userController.getLangFav) //Obtener idioma favorito

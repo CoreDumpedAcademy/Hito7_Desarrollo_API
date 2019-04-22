@@ -85,6 +85,7 @@ const userSchema = new Schema({
 	searchTimes:{type:[Date], required:false, default:[Date.now()]},//Almacena la hora Cada vez que se busca.
 	readTimes:{type:[Date], required:false, default:[Date.now()]},//Almacena la hora cada vez que lees un articulo.
 	loginTimes:{type:[Date], required:false, default:[Date.now()]},//Almacena la hora cada vez que te logueas
+	countriesVisited:{type:[String]},//Almacena los paises que has buscado
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
 		mostUsedKeyWords: {type:[keyWordCounter], required:false, default:keyWordSchemaArray},

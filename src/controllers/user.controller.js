@@ -3,38 +3,43 @@ const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 const service = require('../service');
 const newsStrc = require('../middlewares/newsStructures');
+var iptoken = require('../ipinfo_token')
+var IPinfo = require("node-ipinfo");
+var ipinfo = new IPinfo(iptoken.token);
+const http = require('http');
 
 // Funcion logUser Modificado
 function logUser(req, res) {
   var logged = false
   var wasUpdated = false
-  User.findOne({email: req.body.email}, async (err, user) => {
-    if (err) return res.status(500).send({message: err})
-    if (!user) return res.status(404).send({message: 'No existe el usuario,'})
+  User.findOne({ email: req.body.email }, async (err, user) => {
+    if (err) return res.status(500).send({ message: err })
+    if (!user) return res.status(404).send({ message: 'No existe el usuario,' })
 
     req.user = user
     logged = await helpers.compararPassword(req.body.password + "", user.password + "")
-    
-    if(!user.isActive){
-      if(Date.now()-user.inactiveSince.getTime() >= 2592000000 ){ // HA PASADO MÁS DE UN MES
-        res.status(404).send({message: 'El usuario ha caducado'})
+
+    if (!user.isActive) {
+      if (Date.now() - user.inactiveSince.getTime() >= 2592000000) { // HA PASADO MÁS DE UN MES
+        res.status(404).send({ message: 'El usuario ha caducado' })
       }
       user.isActive = true
       user.inactiveSince = null
       wasUpdated = true
     }
     user.statistics.lastLogin = Date(Date.now())
-    User.findOneAndUpdate({email:req.body.email}, user, (err,updated)=>{
+    User.findOneAndUpdate({ email: req.body.email }, user, (err, updated) => {
       if (err) res.status(500).send(err)
     })
 
-    if (logged) {res.status(200).send({
-      message: 'Login Correcto',
-      token: service.createToken(user),
-      wasUpdated: wasUpdated
+    if (logged) {
+      res.status(200).send({
+        message: 'Login Correcto',
+        token: service.createToken(user),
+        wasUpdated: wasUpdated
       })
     } else {
-      res.status(403).send({message: 'Contraseña incorrecta'})
+      res.status(403).send({ message: 'Contraseña incorrecta' })
     }
 
   })
@@ -57,14 +62,14 @@ function createUser(req, res, next) {
     user.save((err) => {
       if (err) {
         res.status(500).send({
-            message: 'Error al crear el usuario'
-          }),
+          message: 'Error al crear el usuario'
+        }),
           next(err);
-      }else{
-      return res.status(200).send({
-        token: service.createToken(user)
-      })
-	}
+      } else {
+        return res.status(200).send({
+          token: service.createToken(user)
+        })
+      }
     })
   })
 }
@@ -74,26 +79,26 @@ function createUser(req, res, next) {
 // PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL EMAIL DE USUARIO AL QUE ACTIVAR - DESACTIVAR
 function deactivate(req, res) {
   var email = req.params.username
-  User.findOne({email: email}, (err, updated) => {
-    if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
-    if (!updated) return res.status(404).send({message: 'Error 404'})
+  User.findOne({ email: email }, (err, updated) => {
+    if (err) return res.status(500).send({ message: `Error al desactivar el usuario ${err}` })
+    if (!updated) return res.status(404).send({ message: 'Error 404' })
     updated.isActive = false
     updated.inactiveSince = Date.now()
-    User.findOneAndUpdate({email: email}, updated, () => {
-      return res.status(200).send({message: 'User deactivated correctly'})
+    User.findOneAndUpdate({ email: email }, updated, () => {
+      return res.status(200).send({ message: 'User deactivated correctly' })
     })
   })
 }
 
 function activate(req, res) {
   var email = req.params.username
-  User.findOne({email: email}, (err, updated) => {
-    if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
-    if (!updated) return res.status(404).send({message: 'Error 404'})
+  User.findOne({ email: email }, (err, updated) => {
+    if (err) return res.status(500).send({ message: `Error al desactivar el usuario ${err}` })
+    if (!updated) return res.status(404).send({ message: 'Error 404' })
     updated.isActive = true
     updated.inactiveSince = null
-    User.findOneAndUpdate({email:email}, updated, () => {
-      return res.status(200).send({message: 'User activated correctly'})
+    User.findOneAndUpdate({ email: email }, updated, () => {
+      return res.status(200).send({ message: 'User activated correctly' })
     })
   })
 }
@@ -160,7 +165,7 @@ function getInactiveUsers(req, res) {
 
 function getUser(req, res) {
   let mail = req.params.email;
-  User.findOne({email:mail}, (err, user) => {
+  User.findOne({ email: mail }, (err, user) => {
     if (err)
       return res
         .status(500)
@@ -179,13 +184,13 @@ function getUser(req, res) {
 async function updateUser(req, res) {
   let userID = req.params.userId
   let update = req.body
-  console.log("EDITING USER "+ req.params.userId)
-  if(req.body.password != undefined&&req.body.password != ""){
+  console.log("EDITING USER " + req.params.userId)
+  if (req.body.password != undefined && req.body.password != "") {
     console.log("PASSWORD DID CHANGE")  // SI NO SE METE CONTRASEÑA EN LA ACTUALIZACIÓN, NO HAY QUE CAMBIARLA
     update.password = await helpers.encriptarPassword(req.body.password);
   } else console.log("PASSWORD DID NOT CHANGE")
   console.log(update)
-  User.findOneAndUpdate({email:userID}, update, (err, oldUser) => {
+  User.findOneAndUpdate({ email: userID }, update, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el usuario: ${err}`
     })
@@ -223,86 +228,86 @@ function deleteUser(req, res) {
     });
   });
 }
-function getCategories(req, res){
-	User.findOne({email:req.body.email}, (err, user)=>{
-		if(err){ 
-			res.status(500).send(`Error: ${err}`);
-			return next(err)
-		}else{ 
-		return res.status(200).send(user.statistics.categoryViews);
-		}
-	});
+function getCategories(req, res) {
+  User.findOne({ email: req.body.email }, (err, user) => {
+    if (err) {
+      res.status(500).send(`Error: ${err}`);
+      return next(err)
+    } else {
+      return res.status(200).send(user.statistics.categoryViews);
+    }
+  });
 }
 //Funcion que saca el array categoryViews, lo actualiza y lo vuelve a guardar.
 //Sería mas eficiente hacerlo desde el modelo, por el hecho de no tener que sacarlo y luego meterlo pero no lo consigo hacer.
-async function  addCategory(req, res, next){
-	try{
-		const reqCategory = req.body.category;
-		const reqEmail = req.body.email;
-		let categories =  [];
-		let categorySchema;
-		if(reqCategory != null && reqEmail != null){
-			await User.findOne({email:reqEmail}, (err, user) =>{
-				if(err){ 
-					res.status(500).send('HA OCURRIDO UN ERROR'); 
-					return next(err);
-				}
-				if(user){
-					categories = user.statistics.categoryViews;
-				}else{
-					console.log('User no encontrado');
-					res.status(500).send("no user");
-				}
-			});
-			categories.forEach((element) => {
-				if(element.categoryName == reqCategory)element.views = element.views + 1;
-			});
-			User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{categoryViews:categories}}}, (err, user) =>{
-				if(err) return res.status(500).send("Error: " + err);
-				res.status(200).send('ok');
-			});
-		}
-	}catch(e){
-		console.log(e);
-	}
+async function addCategory(req, res, next) {
+  try {
+    const reqCategory = req.body.category;
+    const reqEmail = req.body.email;
+    let categories = [];
+    let categorySchema;
+    if (reqCategory != null && reqEmail != null) {
+      await User.findOne({ email: reqEmail }, (err, user) => {
+        if (err) {
+          res.status(500).send('HA OCURRIDO UN ERROR');
+          return next(err);
+        }
+        if (user) {
+          categories = user.statistics.categoryViews;
+        } else {
+          console.log('User no encontrado');
+          res.status(500).send("no user");
+        }
+      });
+      categories.forEach((element) => {
+        if (element.categoryName == reqCategory) element.views = element.views + 1;
+      });
+      User.findOneAndUpdate({ email: reqEmail }, { $set: { statistics: { categoryViews: categories } } }, (err, user) => {
+        if (err) return res.status(500).send("Error: " + err);
+        res.status(200).send('ok');
+      });
+    }
+  } catch (e) {
+    console.log(e);
+  }
 }
-async function addKeyWord(req, res){
-	const kw = req.body.q;
-	const reqEmail = req.body.email;
-	let kwArray = [];
-	let finded = false;
-	if(reqEmail != null && kw != null){
-		await User.findOne({email:reqEmail}, (err, user) =>{
-			if(err) return res.status(500).send("ERROR: " + err);
-			if(user){
-				kwArray = user.statistics.mostUsedKeyWords;
-				console.log('Recibimos: ' + user.statistics.mostUsedKeyWords + ' Almacenamos: ' + kwArray);
-				res.status(200).send(kwArray);
-			}
-		});
-		console.log('oldKwArray: ' + kwArray);
-		if(kwArray != []){
-			kwArray.forEach((element) =>{
-				console.log(element);
-				if(element.name == kw){
-					element.counter = element.counter + 1;
-					element.lastView = Date.now();
-					finded = true;
-				}
-			});
-			if(!finded){
-				let newKw = {
-					name:kw,
-					counter:1,
-					lastView:Date.now(),
-				}
-				kwArray.push(newKw);
-			}
-		User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{mostUsedKeyWords:kwArray}}}, err =>{
-				if(err)console.log("Ya la has liao: " + err)
-		});
-		}
-	}
+async function addKeyWord(req, res) {
+  const kw = req.body.q;
+  const reqEmail = req.body.email;
+  let kwArray = [];
+  let finded = false;
+  if (reqEmail != null && kw != null) {
+    await User.findOne({ email: reqEmail }, (err, user) => {
+      if (err) return res.status(500).send("ERROR: " + err);
+      if (user) {
+        kwArray = user.statistics.mostUsedKeyWords;
+        console.log('Recibimos: ' + user.statistics.mostUsedKeyWords + ' Almacenamos: ' + kwArray);
+        res.status(200).send(kwArray);
+      }
+    });
+    console.log('oldKwArray: ' + kwArray);
+    if (kwArray != []) {
+      kwArray.forEach((element) => {
+        console.log(element);
+        if (element.name == kw) {
+          element.counter = element.counter + 1;
+          element.lastView = Date.now();
+          finded = true;
+        }
+      });
+      if (!finded) {
+        let newKw = {
+          name: kw,
+          counter: 1,
+          lastView: Date.now(),
+        }
+        kwArray.push(newKw);
+      }
+      User.findOneAndUpdate({ email: reqEmail }, { $set: { statistics: { mostUsedKeyWords: kwArray } } }, err => {
+        if (err) console.log("Ya la has liao: " + err)
+      });
+    }
+  }
 }
 
 
@@ -311,11 +316,11 @@ async function addKeyWord(req, res){
  * @param {*} res
  * update the language preferences 
  */
-function updateLangFav(req,res){
+function updateLangFav(req, res) {
   var lang = req.params.lang
   var userID = req.params.userId
 
-  User.findByIdAndUpdate(userID, {$set: {'preferences.favLanguage':lang}}, (err, oldUser) => {
+  User.findByIdAndUpdate(userID, { $set: { 'preferences.favLanguage': lang } }, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el lenguaje: ${err}`
     })
@@ -331,11 +336,11 @@ function updateLangFav(req,res){
  * @param {*} res 
  * update the country preference
  */
-function updateCountryFav(req,res){
+function updateCountryFav(req, res) {
   var country = req.params.country
   var userID = req.params.userId
 
-  User.findByIdAndUpdate(userID, {$set: {'preferences.favCountry':country}}, (err, oldUser) => {
+  User.findByIdAndUpdate(userID, { $set: { 'preferences.favCountry': country } }, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el pais: ${err}`
     })
@@ -346,7 +351,7 @@ function updateCountryFav(req,res){
   })
 }
 
-function getLangFav(req,res){
+function getLangFav(req, res) {
   let userId = req.params.userId;
 
   User.findById(userId, 'preferences.favLanguage -_id', (err, user) => {
@@ -365,7 +370,7 @@ function getLangFav(req,res){
   });
 }
 
-function getCountryFav(req,res){
+function getCountryFav(req, res) {
   let userId = req.params.userId;
 
   User.findById(userId, 'preferences.favCountry -_id', (err, user) => {
@@ -386,107 +391,145 @@ function getCountryFav(req,res){
 
 
 // ESTA FUNCION RECIBE UN USUARIO POR PARAMETRO Y UNA NOTICIA EN EL BODY DE LA PETICIÓN. GUARDA LA NOTICIA EN EL ARRAY DE NOTICIAS FAVORITAS DEL USUARIO
-function addFavNew(req, res){
+function addFavNew(req, res) {
   var noticia = req.body
   console.log(noticia)
   console.log(req.params.user)
-  User.findOneAndUpdate({userName: req.params.user}, {$push: {favNews: noticia}}, (err, updated)=>{
-    if(err) return res.status(500).send({message: `Error al actualizar el usuario ${err}`})
-    if(!updated) return res.status(404).send({message: "El usuario no existe"})
-    return res.status(200).send({message: "Usuario actualizado correctamente"})
+  User.findOneAndUpdate({ userName: req.params.user }, { $push: { favNews: noticia } }, (err, updated) => {
+    if (err) return res.status(500).send({ message: `Error al actualizar el usuario ${err}` })
+    if (!updated) return res.status(404).send({ message: "El usuario no existe" })
+    return res.status(200).send({ message: "Usuario actualizado correctamente" })
   })
 }
 // ESTA FUNCIÓN OBTIENE UN INDICE DE ARRAY Y BORRA EL OBJETIO NOTICIA DE LA POSICION INDICE DEL ARRAY DE NOTICIAS DEL USUARIO
-function deleteFavArt(req,res){
+function deleteFavArt(req, res) {
   var usern = req.params.user
   var index = req.params.index
   console.log(`ARTICLE DELETING ${usern} - ${index}`)
-  User.findOne({userName:usern}, (err, user) => {
-    if(err) return res.status(500).send({message: `Error al borrar la noticia: ${err}`})
-    if(!user) return res.status(404).send({message: "Usuario no encontrado"})
+  User.findOne({ userName: usern }, (err, user) => {
+    if (err) return res.status(500).send({ message: `Error al borrar la noticia: ${err}` })
+    if (!user) return res.status(404).send({ message: "Usuario no encontrado" })
     console.log(user.favNews.splice(index, 1))
-    User.findOneAndUpdate({userName:usern}, user, (err, updated) => {
-      if(err) return res.status(500).send({message: `Error ${err}`})
-      return res.status(200).send({message: "Noticia eliminada correctamente"})
+    User.findOneAndUpdate({ userName: usern }, user, (err, updated) => {
+      if (err) return res.status(500).send({ message: `Error ${err}` })
+      return res.status(200).send({ message: "Noticia eliminada correctamente" })
     })
   })
 }
 
-function getByUsername(req, res){
+function getByUsername(req, res) {
   const username = req.params.username
   console.log(`GET by USERNAME ${username}`)
-  User.find({userName: username},(err, user) => {
-    if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
-    if(!user) return res.status(404).send({message: 'Usuario no encontrado'})
-    return res.status(200).send({user})
+  User.find({ userName: username }, (err, user) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` })
+    if (!user) return res.status(404).send({ message: 'Usuario no encontrado' })
+    return res.status(200).send({ user })
   })
 }
-function getByEmail(req, res){
-  console.log("GET by EMAIL "+req.params.email)
-	const reqEmail = req.params.email;
-	User.findOne({email:reqEmail}, (err, user) =>{
-		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
-		if(!user) return res.status(404).send({message: 'Usuario no encontrado'});
-		return res.status(200).send({user})
-	});
+function getByEmail(req, res) {
+  console.log("GET by EMAIL " + req.params.email)
+  const reqEmail = req.params.email;
+  User.findOne({ email: reqEmail }, (err, user) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` })
+    if (!user) return res.status(404).send({ message: 'Usuario no encontrado' });
+    return res.status(200).send({ user })
+  });
 }
-function newSearch(req, res){
-	const reqEmail = req.body.email;
-	let date = Date.now();
-		console.log('Date: ' + date + ' mail: ' + reqEmail);
-	if(reqEmail != null){
-		User.findOneAndUpdate({email:reqEmail}, {$push:{searchTimes:date}}, (err, updated) =>{
-				if(err){
-				 res.status(500).send('Error: ' + err);
-				}else{
-				 res.status(200).send('ok');
-				}
-		});
-	}
-}
-function newRead(req, res){
-	const reqEmail = req.body.email;
-	let date = Date.now();
-		console.log('Date: ' + date + ' mail: ' + reqEmail);
-	if(reqEmail != null){
-		User.findOneAndUpdate({email:reqEmail}, {$push:{readTimes:date}}, (err, updated) =>{
-				if(err){
-				 res.status(500).send('Error: ' + err);
-				}else{
-				 res.status(200).send('ok');
-				}
-		});
-	}
-}
-function newLogin(req, res){
-	const reqEmail = req.body.email;
-	let date = Date.now();
-		console.log('Date: ' + date + ' mail: ' + reqEmail);
-	if(reqEmail != null){
-		User.findOneAndUpdate({email:reqEmail}, {$push:{loginTimes:date}}, (err, updated) =>{
-				if(err){
-				 res.status(500).send('Error: ' + err);
-				}else{
-				 res.status(200).send('ok');
-				}
-		});
-	}
-}
-
-  
-  function checkPassword(req, res){
-    var logged = false
-    User.findOne({email: req.body.email}, async (err, user) => {
-      if (err) return res.status(500).send({ message: err })
-      if (!user) return res.status(404).send({message: 'No existe el usuario,'})
-
-      req.user = user
-      logged = await helpers.compararPassword(req.body.password + "", user.password + "")
-
-      if (logged) res.status(200).send({message: 'Contraseña correcta'})
-      else res.status(403).send({message: 'Contraseña incorrecta'})
-    })
+function newSearch(req, res) {
+  const reqEmail = req.body.email;
+  let date = Date.now();
+  console.log('Date: ' + date + ' mail: ' + reqEmail);
+  if (reqEmail != null) {
+    User.findOneAndUpdate({ email: reqEmail }, { $push: { searchTimes: date } }, (err, updated) => {
+      if (err) {
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.status(200).send('ok');
+      }
+    });
   }
+}
+function newRead(req, res) {
+  const reqEmail = req.body.email;
+  let date = Date.now();
+  console.log('Date: ' + date + ' mail: ' + reqEmail);
+  if (reqEmail != null) {
+    User.findOneAndUpdate({ email: reqEmail }, { $push: { readTimes: date } }, (err, updated) => {
+      if (err) {
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.status(200).send('ok');
+      }
+    });
+  }
+}
+function newLogin(req, res) {
+  const reqEmail = req.body.email;
+  let date = Date.now();
+  console.log('Date: ' + date + ' mail: ' + reqEmail);
+  if (reqEmail != null) {
+    User.findOneAndUpdate({ email: reqEmail }, { $push: { loginTimes: date } }, (err, updated) => {
+      if (err) {
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.status(200).send('ok');
+      }
+    });
+  }
+}
+
+async function getCountryWithIp(reqEmail){
+  console.log("llamada")
+  var options = {
+    host: 'ipv4bot.whatismyipaddress.com',
+    port: 80,
+    path: '/'
+  };
+  await http.get(options, function (res) {
+    res.on("data",async function (chunk) {
+      ip = chunk+""
+      if (ip != undefined) {
+        await ipinfo.lookupIp(ip).then((response) => {
+          country = response.country
+          console.log(country)
+          if(country===undefined) country = 'unregistered country'
+          if (reqEmail != null && country!=undefined) {
+            User.findOneAndUpdate({ email: reqEmail }, { $push: { CountriesVisited: country } }, (err, updated) => {
+
+              if(!err){
+                return false
+              }
+
+            });
+          }
+        });
+      }
+    });
+  }).on('error', function (e) {
+    console.log("error: " + e.message);
+  });
+}
+
+async function addCountry(req, res) {
+  const reqEmail = req.body.email;
+  var err = await getCountryWithIp(reqEmail)
+  if(await !err)res.status(200).send({message:'testing '+country})
+}
+
+
+function checkPassword(req, res) {
+  var logged = false
+  User.findOne({ email: req.body.email }, async (err, user) => {
+    if (err) return res.status(500).send({ message: err })
+    if (!user) return res.status(404).send({ message: 'No existe el usuario,' })
+
+    req.user = user
+    logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+
+    if (logged) res.status(200).send({ message: 'Contraseña correcta' })
+    else res.status(403).send({ message: 'Contraseña incorrecta' })
+  })
+}
 
 module.exports = {
   createUser,
@@ -506,7 +549,7 @@ module.exports = {
   updateCountryFav,
   getLangFav,
   getCountryFav,
-  getByEmail, 
+  getByEmail,
   deleteFavArt,
   addCategory,
   getCategories,
@@ -514,5 +557,6 @@ module.exports = {
   newSearch,
   newRead,
   newLogin,
+  addCountry,
   checkPassword
 };
