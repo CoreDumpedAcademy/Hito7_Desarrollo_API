@@ -28,6 +28,15 @@ api.put('/user/deactivate/:username',userController.deactivate) // DESACTIVAR US
 api.put('/favNews/:user',userController.addFavNew) // AÑADIR UNA NOTICIA AL USUARIO :user
 api.put('/favNews/:user/:index', userController.deleteFavArt) // ELIMINA LA NOTICIA FAVORITA DE LA POSICIÓN INDEX DEL USUARIO USER
 
+api.post('/user/addCategory', userController.addCategory) //+1 A LA CATEGORÍA VISITDADA
+api.post('/user/categoriesViews', userController.getCategories);//DEVUELVE TODAS LAS CATEGORIAS Y SUS RESPECTIVAS VISITAS.
+
+api.post('/user/addKeyWord', userController.addKeyWord);//+1 A LA KEYWORD MANDADA.
+
+api.post('/user/newSearch', userController.newSearch);//almacena la hora cada vez que se busca
+api.post('/user/newRead', userController.newRead);//almacena la hora cada vez que se lee
+api.post('/user/newLogin', userController.newLogin);//almacena la hora cada vez que se hace login
+
 api.put('/user/lang/:userId/:lang',userController.updateLangFav) //Actualizar idioma favorito
 api.put('/user/country/:userId/:country',userController.updateCountryFav) //Actualizar pais favorito
 api.get('/user/lang/:userId',userController.getLangFav) //Obtener idioma favorito

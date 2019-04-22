@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 const service = require('../service');
-
+const newsStrc = require('../middlewares/newsStructures');
 
 // Funcion logUser Modificado
 function logUser(req, res) {
@@ -60,10 +60,11 @@ function createUser(req, res, next) {
             message: 'Error al crear el usuario'
           }),
           next(err);
-      }
+      }else{
       return res.status(200).send({
         token: service.createToken(user)
       })
+	}
     })
   })
 }
@@ -159,7 +160,6 @@ function getInactiveUsers(req, res) {
 
 function getUser(req, res) {
   let mail = req.params.email;
-
   User.findOne({email:mail}, (err, user) => {
     if (err)
       return res
@@ -222,6 +222,87 @@ function deleteUser(req, res) {
       });
     });
   });
+}
+function getCategories(req, res){
+	User.findOne({email:req.body.email}, (err, user)=>{
+		if(err){ 
+			res.status(500).send(`Error: ${err}`);
+			return next(err)
+		}else{ 
+		return res.status(200).send(user.statistics.categoryViews);
+		}
+	});
+}
+//Funcion que saca el array categoryViews, lo actualiza y lo vuelve a guardar.
+//Sería mas eficiente hacerlo desde el modelo, por el hecho de no tener que sacarlo y luego meterlo pero no lo consigo hacer.
+async function  addCategory(req, res, next){
+	try{
+		const reqCategory = req.body.category;
+		const reqEmail = req.body.email;
+		let categories =  [];
+		let categorySchema;
+		if(reqCategory != null && reqEmail != null){
+			await User.findOne({email:reqEmail}, (err, user) =>{
+				if(err){ 
+					res.status(500).send('HA OCURRIDO UN ERROR'); 
+					return next(err);
+				}
+				if(user){
+					categories = user.statistics.categoryViews;
+				}else{
+					console.log('User no encontrado');
+					res.status(500).send("no user");
+				}
+			});
+			categories.forEach((element) => {
+				if(element.categoryName == reqCategory)element.views = element.views + 1;
+			});
+			User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{categoryViews:categories}}}, (err, user) =>{
+				if(err) return res.status(500).send("Error: " + err);
+				res.status(200).send('ok');
+			});
+		}
+	}catch(e){
+		console.log(e);
+	}
+}
+async function addKeyWord(req, res){
+	const kw = req.body.q;
+	const reqEmail = req.body.email;
+	let kwArray = [];
+	let finded = false;
+	if(reqEmail != null && kw != null){
+		await User.findOne({email:reqEmail}, (err, user) =>{
+			if(err) return res.status(500).send("ERROR: " + err);
+			if(user){
+				kwArray = user.statistics.mostUsedKeyWords;
+				console.log('Recibimos: ' + user.statistics.mostUsedKeyWords + ' Almacenamos: ' + kwArray);
+				res.status(200).send(kwArray);
+			}
+		});
+		console.log('oldKwArray: ' + kwArray);
+		if(kwArray != []){
+			kwArray.forEach((element) =>{
+				console.log(element);
+				if(element.name == kw){
+					element.counter = element.counter + 1;
+					element.lastView = Date.now();
+					finded = true;
+				}
+			});
+			if(!finded){
+				let newKw = {
+					name:kw,
+					counter:1,
+					lastView:Date.now(),
+				}
+				kwArray.push(newKw);
+			}
+		User.findOneAndUpdate({email:reqEmail}, {$set:{statistics:{mostUsedKeyWords:kwArray}}}, err =>{
+				if(err)console.log("Ya la has liao: " + err)
+		});
+		}
+	}
 }
 
 
@@ -347,8 +428,51 @@ function getByEmail(req, res){
 		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
 		if(!user) return res.status(404).send({message: 'Usuario no encontrado'});
 		return res.status(200).send({user})
-  });
-  }
+	});
+}
+function newSearch(req, res){
+	const reqEmail = req.body.email;
+	let date = Date.now();
+		console.log('Date: ' + date + ' mail: ' + reqEmail);
+	if(reqEmail != null){
+		User.findOneAndUpdate({email:reqEmail}, {$push:{searchTimes:date}}, (err, updated) =>{
+				if(err){
+				 res.status(500).send('Error: ' + err);
+				}else{
+				 res.status(200).send('ok');
+				}
+		});
+	}
+}
+function newRead(req, res){
+	const reqEmail = req.body.email;
+	let date = Date.now();
+		console.log('Date: ' + date + ' mail: ' + reqEmail);
+	if(reqEmail != null){
+		User.findOneAndUpdate({email:reqEmail}, {$push:{readTimes:date}}, (err, updated) =>{
+				if(err){
+				 res.status(500).send('Error: ' + err);
+				}else{
+				 res.status(200).send('ok');
+				}
+		});
+	}
+}
+function newLogin(req, res){
+	const reqEmail = req.body.email;
+	let date = Date.now();
+		console.log('Date: ' + date + ' mail: ' + reqEmail);
+	if(reqEmail != null){
+		User.findOneAndUpdate({email:reqEmail}, {$push:{loginTimes:date}}, (err, updated) =>{
+				if(err){
+				 res.status(500).send('Error: ' + err);
+				}else{
+				 res.status(200).send('ok');
+				}
+		});
+	}
+}
+
   
   function checkPassword(req, res){
     var logged = false
@@ -384,5 +508,11 @@ module.exports = {
   getCountryFav,
   getByEmail, 
   deleteFavArt,
+  addCategory,
+  getCategories,
+  addKeyWord,
+  newSearch,
+  newRead,
+  newLogin,
   checkPassword
 };
