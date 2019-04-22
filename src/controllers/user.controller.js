@@ -264,7 +264,6 @@ function getCategories(req, res){
 //Sería mas eficiente hacerlo desde el modelo, por el hecho de no tener que sacarlo y luego meterlo pero no lo consigo hacer.
 async function  addCategory(req, res, next){
 	try{
-		console.log("RECIBIMOS: " + req.body);
 		const reqCategory = req.body.category;
 		const reqEmail = req.body.email;
 		let categories =  [];
