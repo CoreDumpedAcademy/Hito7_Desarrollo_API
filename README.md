@@ -2,8 +2,8 @@
 ## ON DEV
 
 ## installation
-- `git clone https://github.com/HackatonTeam-CoreDumped`
-- `cd https://github.com/HackatonTeam-CoreDumped`
+- `git clone https://github.com/HackatonTeam-CoreDumped/Hito7_Desarrollo_API`
+- `cd Hito7_Desarrollo_API`
 - `npm install`
 - `npm run dev`
 
