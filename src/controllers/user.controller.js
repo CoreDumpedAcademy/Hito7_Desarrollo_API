@@ -376,6 +376,48 @@ function getByEmail(req, res){
 		return res.status(200).send({user})
 	});
 }
+function newSearch(req, res){
+	const reqEmail = req.body.email;
+	let date = Date.now();
+		console.log('Date: ' + date + ' mail: ' + reqEmail);
+	if(reqEmail != null){
+		User.findOneAndUpdate({email:reqEmail}, {$push:{searchTimes:date}}, (err, updated) =>{
+				if(err){
+				 res.status(500).send('Error: ' + err);
+				}else{
+				 res.status(200).send('ok');
+				}
+		});
+	}
+}
+function newRead(req, res){
+	const reqEmail = req.body.email;
+	let date = Date.now();
+		console.log('Date: ' + date + ' mail: ' + reqEmail);
+	if(reqEmail != null){
+		User.findOneAndUpdate({email:reqEmail}, {$push:{readTimes:date}}, (err, updated) =>{
+				if(err){
+				 res.status(500).send('Error: ' + err);
+				}else{
+				 res.status(200).send('ok');
+				}
+		});
+	}
+}
+function newLogin(req, res){
+	const reqEmail = req.body.email;
+	let date = Date.now();
+		console.log('Date: ' + date + ' mail: ' + reqEmail);
+	if(reqEmail != null){
+		User.findOneAndUpdate({email:reqEmail}, {$push:{loginTimes:date}}, (err, updated) =>{
+				if(err){
+				 res.status(500).send('Error: ' + err);
+				}else{
+				 res.status(200).send('ok');
+				}
+		});
+	}
+}
 
 module.exports = {
   createUser,
@@ -395,4 +437,7 @@ module.exports = {
   addCategory,
   getCategories,
   addKeyWord,
+  newSearch,
+  newRead,
+  newLogin,
 };

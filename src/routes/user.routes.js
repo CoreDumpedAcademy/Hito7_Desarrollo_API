@@ -33,4 +33,8 @@ api.post('/user/categoriesViews', userController.getCategories);//DEVUELVE TODAS
 
 api.post('/user/addKeyWord', userController.addKeyWord);//+1 A LA KEYWORD MANDADA.
 
+api.post('/user/newSearch', userController.newSearch);
+api.post('/user/newRead', userController.newRead);
+api.post('/user/newLogin', userController.newLogin);
+
 module.exports = api;

@@ -81,6 +81,9 @@ const userSchema = new Schema({
 	favNews: {type: [NewsSchema], maxlength: 20}, // ARRAY DE NOTICIAS FAVORITAS
 	email: { type: String, required: true, maxlength: 50, unique: true },
 	signUp: { type: Date, default: Date.now() },
+	searchTimes:{type:[Date], required:false, default:[Date.now()]},//Almacena la hora Cada vez que se busca.
+	readTimes:{type:[Date], required:false, default:[Date.now()]},//Almacena la hora cada vez que lees un articulo.
+	loginTimes:{type:[Date], required:false, default:[Date.now()]},//Almacena la hora cada vez que te logueas
 	statistics: {
 		lastLogin: { type: Date, default: Date.now() },
 		mostUsedKeyWords: {type:[keyWordCounter], required:false, default:keyWordSchemaArray},
