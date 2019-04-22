@@ -3,52 +3,38 @@ const enume = require("../middlewares/enumStructures");
 const helpers = require('../lib/helpers.js');
 const service = require('../service');
 const newsStrc = require('../middlewares/newsStructures');
-/*
-//Login de usuarios, recibimos los parametros en el body de la peticion post, comprobamos que el user existe y comparamos la pw enviada con el hash almacenado.
-async function logUser(req, res) {
-  const logUser = req.body;
-  let logueado = false;
-  User.findOne({ email: logUser.email }, async function (err, user) {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición: ${err}` });
-    console.log(user);
-    if (!user) return res.status(404).send({ message: "El usuario no existe" });
-    logueado = await helpers.compararPassword(logUser.password.toString(), user.password.toString());
-    if (logueado) {
-      return res.status(200).send({ message: "Te has logueado correctamente" });
-    } else {
-      return res.status(404).send({ message: "Usuario o contraseña incorrectos" });
-    }
-  });
-}
-*/
 
 // Funcion logUser Modificado
 function logUser(req, res) {
   var logged = false
-  User.findOne({
-    email: req.body.email
-  }, async (err, user) => {
-    if (err)
-      return res.status(500).send({
-        message: err
-      })
-    if (!user)
-      return res.status(404).send({
-        message: 'No existe el usuario,'
-      })
+  var wasUpdated = false
+  User.findOne({email: req.body.email}, async (err, user) => {
+    if (err) return res.status(500).send({message: err})
+    if (!user) return res.status(404).send({message: 'No existe el usuario,'})
 
     req.user = user
     logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+    
+    if(!user.isActive){
+      if(Date.now()-user.inactiveSince.getTime() >= 2592000000 ){ // HA PASADO MÁS DE UN MES
+        res.status(404).send({message: 'El usuario ha caducado'})
+      }
+      user.isActive = true
+      user.inactiveSince = null
+      wasUpdated = true
+    }
+    user.statistics.lastLogin = Date(Date.now())
+    User.findOneAndUpdate({email:req.body.email}, user, (err,updated)=>{
+      if (err) res.status(500).send(err)
+    })
 
-    if (logged) {
-      res.status(200).send({
-        message: 'Login Correcto',
-        token: service.createToken(user)
+    if (logged) {res.status(200).send({
+      message: 'Login Correcto',
+      token: service.createToken(user),
+      wasUpdated: wasUpdated
       })
     } else {
-      res.status(500).send({
-        message: 'Contraseña incorrecta',
-      })
+      res.status(403).send({message: 'Contraseña incorrecta'})
     }
 
   })
@@ -85,47 +71,29 @@ function createUser(req, res, next) {
 
 
 // LAS DOS FUNCIONES SIGUIENTES SIRVEN PARA ACTIVAR O DESACTIVAR EL USUARIO (BORRADO LÓGICO)
-// PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL NOMBRE DE USUARIO AL QUE ACTIVAR - DESACTIVAR
+// PARA USARLAS HAY QUE PASAR COMO PARAMETRO EL EMAIL DE USUARIO AL QUE ACTIVAR - DESACTIVAR
 function deactivate(req, res) {
-  var username = req.params.username
-  User.findOne({
-    userName: username
-  }, (err, updated) => {
-    if (err) return res.status(500).send({
-      message: `Error al desactivar el usuario ${err}`
-    })
-    if (!updated) return res.status(404).send({
-      message: 'Error 404'
-    })
+  var email = req.params.username
+  User.findOne({email: email}, (err, updated) => {
+    if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if (!updated) return res.status(404).send({message: 'Error 404'})
     updated.isActive = false
-    User.findOneAndUpdate({
-      userName: username
-    }, updated, () => {
-      return res.status(200).send({
-        message: 'User deactivated correctly'
-      })
+    updated.inactiveSince = Date.now()
+    User.findOneAndUpdate({email: email}, updated, () => {
+      return res.status(200).send({message: 'User deactivated correctly'})
     })
   })
 }
 
 function activate(req, res) {
-  var username = req.params.username
-  User.findOne({
-    userName: username
-  }, (err, updated) => {
-    if (err) return res.status(500).send({
-      message: `Error al desactivar el usuario ${err}`
-    })
-    if (!updated) return res.status(404).send({
-      message: 'Error 404'
-    })
+  var email = req.params.username
+  User.findOne({email: email}, (err, updated) => {
+    if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
+    if (!updated) return res.status(404).send({message: 'Error 404'})
     updated.isActive = true
-    User.findOneAndUpdate({
-      userName: username
-    }, updated, () => {
-      return res.status(200).send({
-        message: 'User deactivated correctly'
-      })
+    updated.inactiveSince = null
+    User.findOneAndUpdate({email:email}, updated, () => {
+      return res.status(200).send({message: 'User activated correctly'})
     })
   })
 }
@@ -211,9 +179,13 @@ function getUser(req, res) {
 async function updateUser(req, res) {
   let userID = req.params.userId
   let update = req.body
-  update.password = await helpers.encriptarPassword(req.body.password);
-
-  User.findByIdAndUpdate(userID, update, (err, oldUser) => {
+  console.log("EDITING USER "+ req.params.userId)
+  if(req.body.password != undefined&&req.body.password != ""){
+    console.log("PASSWORD DID CHANGE")  // SI NO SE METE CONTRASEÑA EN LA ACTUALIZACIÓN, NO HAY QUE CAMBIARLA
+    update.password = await helpers.encriptarPassword(req.body.password);
+  } else console.log("PASSWORD DID NOT CHANGE")
+  console.log(update)
+  User.findOneAndUpdate({email:userID}, update, (err, oldUser) => {
     if (err) res.status(500).send({
       message: `Error al actualizar el usuario: ${err}`
     })
@@ -223,6 +195,7 @@ async function updateUser(req, res) {
     })
   })
 }
+
 
 function deleteUser(req, res) {
   let userId = req.params.userId;
@@ -331,6 +304,87 @@ async function addKeyWord(req, res){
 		}
 	}
 }
+
+
+/**
+ * @param {*} req 
+ * @param {*} res
+ * update the language preferences 
+ */
+function updateLangFav(req,res){
+  var lang = req.params.lang
+  var userID = req.params.userId
+
+  User.findByIdAndUpdate(userID, {$set: {'preferences.favLanguage':lang}}, (err, oldUser) => {
+    if (err) res.status(500).send({
+      message: `Error al actualizar el lenguaje: ${err}`
+    })
+
+    res.status(200).send({
+      user: oldUser
+    })
+  })
+}
+
+/**
+ * @param {*} req 
+ * @param {*} res 
+ * update the country preference
+ */
+function updateCountryFav(req,res){
+  var country = req.params.country
+  var userID = req.params.userId
+
+  User.findByIdAndUpdate(userID, {$set: {'preferences.favCountry':country}}, (err, oldUser) => {
+    if (err) res.status(500).send({
+      message: `Error al actualizar el pais: ${err}`
+    })
+
+    res.status(200).send({
+      user: oldUser
+    })
+  })
+}
+
+function getLangFav(req,res){
+  let userId = req.params.userId;
+
+  User.findById(userId, 'preferences.favLanguage -_id', (err, user) => {
+    if (err)
+      return res
+        .status(500)
+        .send({
+          message: `Error al realizar peticion: ${err}`
+        });
+    if (!user) return res.status(404).send({
+      message: `El usuario no existe`
+    });
+    res.status(200).send({
+      user
+    });
+  });
+}
+
+function getCountryFav(req,res){
+  let userId = req.params.userId;
+
+  User.findById(userId, 'preferences.favCountry -_id', (err, user) => {
+    if (err)
+      return res
+        .status(500)
+        .send({
+          message: `Error al realizar peticion: ${err}`
+        });
+    if (!user) return res.status(404).send({
+      message: `El usuario no existe`
+    });
+    res.status(200).send({
+      user
+    });
+  });
+}
+
+
 // ESTA FUNCION RECIBE UN USUARIO POR PARAMETRO Y UNA NOTICIA EN EL BODY DE LA PETICIÓN. GUARDA LA NOTICIA EN EL ARRAY DE NOTICIAS FAVORITAS DEL USUARIO
 function addFavNew(req, res){
   var noticia = req.body
@@ -368,6 +422,7 @@ function getByUsername(req, res){
   })
 }
 function getByEmail(req, res){
+  console.log("GET by EMAIL "+req.params.email)
 	const reqEmail = req.params.email;
 	User.findOne({email:reqEmail}, (err, user) =>{
 		if(err) return res.status(500).send({message: `Error al realizar la petición: ${err}`})
@@ -418,6 +473,21 @@ function newLogin(req, res){
 	}
 }
 
+  
+  function checkPassword(req, res){
+    var logged = false
+    User.findOne({email: req.body.email}, async (err, user) => {
+      if (err) return res.status(500).send({ message: err })
+      if (!user) return res.status(404).send({message: 'No existe el usuario,'})
+
+      req.user = user
+      logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+
+      if (logged) res.status(200).send({message: 'Contraseña correcta'})
+      else res.status(403).send({message: 'Contraseña incorrecta'})
+    })
+  }
+
 module.exports = {
   createUser,
   getUser,
@@ -431,6 +501,11 @@ module.exports = {
   logUser,
   addFavNew,
   getByUsername,
+  deleteFavArt,
+  updateLangFav,
+  updateCountryFav,
+  getLangFav,
+  getCountryFav,
   getByEmail, 
   deleteFavArt,
   addCategory,
@@ -439,4 +514,5 @@ module.exports = {
   newSearch,
   newRead,
   newLogin,
+  checkPassword
 };

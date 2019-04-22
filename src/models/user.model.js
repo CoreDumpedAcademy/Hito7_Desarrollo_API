@@ -74,6 +74,7 @@ const userSchema = new Schema({
 	age: { type: Number },
 	gender: { type: String, enum: enumerator.gender },
 	isActive: { type: Boolean, default: true },
+	inactiveSince: {type: Date},
 	password: {
 		type: String,
 		required: true

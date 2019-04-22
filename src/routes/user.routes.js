@@ -33,8 +33,15 @@ api.post('/user/categoriesViews', userController.getCategories);//DEVUELVE TODAS
 
 api.post('/user/addKeyWord', userController.addKeyWord);//+1 A LA KEYWORD MANDADA.
 
-api.post('/user/newSearch', userController.newSearch);
-api.post('/user/newRead', userController.newRead);
-api.post('/user/newLogin', userController.newLogin);
+api.post('/user/newSearch', userController.newSearch);//almacena la hora cada vez que se busca
+api.post('/user/newRead', userController.newRead);//almacena la hora cada vez que se lee
+api.post('/user/newLogin', userController.newLogin);//almacena la hora cada vez que se hace login
+
+api.put('/user/lang/:userId/:lang',userController.updateLangFav) //Actualizar idioma favorito
+api.put('/user/country/:userId/:country',userController.updateCountryFav) //Actualizar pais favorito
+api.get('/user/lang/:userId',userController.getLangFav) //Obtener idioma favorito
+api.get('/user/country/:userId',userController.getCountryFav) //Obtener pais favorito
+
+api.post('/checkpwd', userController.checkPassword) // COMO EL LOGIN, PERO NO GENERA TOKEN
 
 module.exports = api;
