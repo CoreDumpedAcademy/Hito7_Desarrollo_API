@@ -7,30 +7,34 @@ const service = require('../service');
 // Funcion logUser Modificado
 function logUser(req, res) {
   var logged = false
-  User.findOne({
-    email: req.body.email
-  }, async (err, user) => {
-    if (err)
-      return res.status(500).send({
-        message: err
-      })
-    if (!user)
-      return res.status(404).send({
-        message: 'No existe el usuario,'
-      })
+  var wasUpdated = false
+  User.findOne({email: req.body.email}, async (err, user) => {
+    if (err) return res.status(500).send({message: err})
+    if (!user) return res.status(404).send({message: 'No existe el usuario,'})
 
     req.user = user
     logged = await helpers.compararPassword(req.body.password + "", user.password + "")
+    
+    if(!user.isActive){
+      if(Date.now()-user.inactiveSince.getTime() >= 2592000000 ){ // HA PASADO MÁS DE UN MES
+        res.status(404).send({message: 'El usuario ha caducado'})
+      }
+      user.isActive = true
+      user.inactiveSince = null
+      wasUpdated = true
+    }
+    user.statistics.lastLogin = Date(Date.now())
+    User.findOneAndUpdate({email:req.body.email}, user, (err,updated)=>{
+      if (err) res.status(500).send(err)
+    })
 
-    if (logged) {
-      res.status(200).send({
-        message: 'Login Correcto',
-        token: service.createToken(user)
+    if (logged) {res.status(200).send({
+      message: 'Login Correcto',
+      token: service.createToken(user),
+      wasUpdated: wasUpdated
       })
     } else {
-      res.status(403).send({
-        message: 'Contraseña incorrecta',
-      })
+      res.status(403).send({message: 'Contraseña incorrecta'})
     }
 
   })
@@ -73,6 +77,7 @@ function deactivate(req, res) {
     if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
     if (!updated) return res.status(404).send({message: 'Error 404'})
     updated.isActive = false
+    updated.inactiveSince = Date.now()
     User.findOneAndUpdate({email: email}, updated, () => {
       return res.status(200).send({message: 'User deactivated correctly'})
     })
@@ -85,6 +90,7 @@ function activate(req, res) {
     if (err) return res.status(500).send({message: `Error al desactivar el usuario ${err}`})
     if (!updated) return res.status(404).send({message: 'Error 404'})
     updated.isActive = true
+    updated.inactiveSince = null
     User.findOneAndUpdate({email:email}, updated, () => {
       return res.status(200).send({message: 'User activated correctly'})
     })
